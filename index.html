@@ -8,14 +8,14 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Ajuste para não deixar o conteúdo escondido atrás da barra móvel no fim da página */
         @media (max-width: 768px) {
-            .pb-mobile { padding-bottom: 80px; }
+            .pb-mobile { padding-bottom: 90px; }
         }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans antialiased">
 
+    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-100 px-4">
         <div class="w-full max-w-md p-6 sm:p-8 bg-white border border-gray-200 rounded-xl shadow-md space-y-6">
             <div class="text-center space-y-4">
@@ -39,8 +39,10 @@
         </div>
     </div>
 
+    <!-- PAINEL PRINCIPAL -->
     <div id="main-panel" class="hidden">
         
+        <!-- HEADER PARA MOBILE -->
         <header class="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-30">
             <img src="logolbm.png" alt="LBM Logo" class="h-10 w-auto object-contain">
             <button onclick="handleLogout()" class="text-red-600 p-2 text-sm font-medium flex items-center space-x-1">
@@ -49,7 +51,8 @@
             </button>
         </header>
 
-        <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-white border-r border-gray-200 hidden md:flex flex-col justify-between px-3 py-4" aria-label="Sidebar">
+        <!-- MENU LATERAL (DESKTOP) -->
+        <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-white border-r border-gray-200 hidden md:flex flex-col justify-between px-3 py-4">
             <div>
                 <div class="flex items-center justify-center px-2 py-3 mb-6 border-b border-gray-100">
                     <img src="logolbm.png" alt="LBM Logo" class="h-20 w-auto object-contain">
@@ -76,9 +79,9 @@
                     </li>
                     
                     <li id="adm-menu-hours" class="hidden">
-                        <button onclick="switchTab('adm-panel')" id="btn-adm-panel" class="w-full flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 menu-btn">
-                            <i class="fa-solid fa-chart-pie w-5 h-5 text-gray-500"></i>
-                            <span class="ms-3 font-bold text-purple-700">Controllo Ore</span>
+                        <button onclick="switchTab('adm-panel')" id="btn-adm-panel" class="w-full flex items-center p-2 text-purple-700 bg-purple-50 rounded-lg menu-btn">
+                            <i class="fa-solid fa-chart-pie w-5 h-5 text-purple-700"></i>
+                            <span class="ms-3 font-bold">Controllo Ore</span>
                         </button>
                     </li>
                     <li id="adm-menu-users" class="hidden">
@@ -106,14 +109,16 @@
             </div>
         </aside>
 
+        <!-- BARRA INFERIOR (MOBILE) -->
         <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-lg">
-            <div class="grid grid-cols-4 h-16 max-w-lg mx-auto font-medium" id="mobile-nav-buttons">
-                </div>
+            <div class="grid grid-cols-4 h-16 max-w-lg mx-auto font-medium" id="mobile-nav-buttons"></div>
         </nav>
 
+        <!-- CONTEÚDO PRINCIPAL -->
         <div class="md:pl-64 bg-gray-50 min-h-screen pb-mobile">
             <div class="p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
                 
+                <!-- 1. HOME -->
                 <div id="tab-home" class="tab-content space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Benvenuto, <span class="user-display">Utente</span></h1>
@@ -137,6 +142,7 @@
                     </div>
                 </div>
 
+                <!-- 2. SEGNA ORE -->
                 <div id="tab-segna-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Segna Ore</h1>
@@ -160,7 +166,7 @@
                             </div>
                             <div>
                                 <label class="block mb-1 text-sm font-medium text-gray-700">Note / Descrizione attività</label>
-                                <textarea id="turno-note" rows="3" placeholder="Descrivi il lavoro svolto..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></textarea>
+                                <textarea id="turno-note" rows="3" placeholder="Descrivi il trabalho svolto..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></textarea>
                             </div>
                             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 pt-2">
                                 <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
@@ -172,6 +178,7 @@
                     </div>
                 </div>
 
+                <!-- 3. MIE ORE -->
                 <div id="tab-mie-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Mie Ore</h1>
@@ -194,6 +201,7 @@
                     </div>
                 </div>
 
+                <!-- 4. ADM - CONTROLLO ORE -->
                 <div id="tab-adm-panel" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-purple-800">Pannello Controllo Ore</h1>
@@ -203,11 +211,11 @@
                     <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Seleziona Dipendente</label>
-                            <select id="adm-select-user" onchange="renderAdmHours()" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500"></select>
+                            <select id="adm-select-user" onchange="renderAdmHours()" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></select>
                         </div>
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700">Filtra per Mese</label>
-                            <select id="adm-select-month" onchange="renderAdmHours()" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500">
+                            <select id="adm-select-month" onchange="renderAdmHours()" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm">
                                 <option value="all">Tutti i mesi</option>
                                 <option value="01">Gennaio</option>
                                 <option value="02">Febbraio</option>
@@ -224,7 +232,7 @@
                             </select>
                         </div>
                         <div class="p-3 bg-purple-50 border border-purple-100 rounded-lg flex justify-between items-center">
-                            <span class="text-xs font-bold text-purple-700 uppercase">Totale Ore:</span>
+                            <span class="text-xs font-bold text-purple-700 uppercase">Totale:</span>
                             <span id="adm-total-calc" class="text-lg font-black text-purple-900">00:00</span>
                         </div>
                     </div>
@@ -246,10 +254,11 @@
                     </div>
                 </div>
 
+                <!-- 5. ADM - GESTIONE UTENTI -->
                 <div id="tab-adm-users" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-purple-800">Gestione Utenti Dipendenti</h1>
-                        <p class="text-xs text-gray-500">Crea nuovi profili di accesso o rimuovi dipendenti esistentes</p>
+                        <p class="text-xs text-gray-500">Crea o rimuovi i profili di accesso</p>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -293,6 +302,7 @@
                     </div>
                 </div>
 
+                <!-- 6. PROFILO -->
                 <div id="tab-profilo" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Profilo Utente</h1>
@@ -317,12 +327,13 @@
     <script>
         const MASTER_ADMIN = { username: "admin", password: "1570751", name: "Luan (Amministratore)", role: "admin" };
         let currentUser = null;
-        let dbUsers = null;
+        let dbUsers = {};
 
         const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_database_v2";
 
         document.getElementById('turno-data').valueAsDate = new Date();
 
+        // 1. CARREGAMENTO INICIAL CORRIGIDO
         async function loadDataFromCloud() {
             try {
                 const response = await fetch(CLOUD_URL);
@@ -330,33 +341,24 @@
                     const text = await response.text();
                     if (text && text.trim().startsWith('{')) {
                         dbUsers = JSON.parse(text);
+                        localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
                     }
                 }
             } catch (e) {
-                console.log("Errore connessione cloud.");
+                console.log("Errore connessione cloud. Uso locale.");
+                const local = localStorage.getItem('lbm_users_db');
+                if(local) dbUsers = JSON.parse(local);
             }
 
             if (!dbUsers || Object.keys(dbUsers).length === 0) {
                 dbUsers = {
-                    "ana": { password: "123", name: "Ana", role: "user", records: [] }
+                    "ana": { password: "123", name: "Ana Silva", role: "user", records: [] }
                 };
                 await saveDB();
             }
-            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
-        }
-        }
-
-            if (!dbUsers || Object.keys(dbUsers).length === 0) {
-                dbUsers = {
-                    "gabriel": { password: "123", name: "Gabriel", role: "user", records: [] }
-                };
-                await saveDB();
-            }
-            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
         }
 
         async function saveDB() {
-            if (!dbUsers) return;
             localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
             try {
                 await fetch(CLOUD_URL, {
@@ -368,10 +370,51 @@
             }
         }
 
-        loadDataFromCloud();
+        function buildMobileNav() {
+            const container = document.getElementById('mobile-nav-buttons');
+            if (!container) return;
+            
+            if (currentUser.role === 'admin') {
+                container.className = "grid grid-cols-3 h-16 max-w-lg mx-auto font-medium";
+                container.innerHTML = `
+                    <button onclick="switchTab('adm-panel')" id="m-btn-adm-panel" class="inline-flex flex-col items-center justify-center px-5 text-purple-700">
+                        <i class="fa-solid fa-chart-pie text-lg mb-1"></i>
+                        <span class="text-xs">Ore</span>
+                    </button>
+                    <button onclick="switchTab('adm-users')" id="m-btn-adm-users" class="inline-flex flex-col items-center justify-center px-5 text-gray-500">
+                        <i class="fa-solid fa-users-gear text-lg mb-1"></i>
+                        <span class="text-xs">Utenti</span>
+                    </button>
+                    <button onclick="switchTab('profilo')" id="m-btn-profilo" class="inline-flex flex-col items-center justify-center px-5 text-gray-500">
+                        <i class="fa-solid fa-user text-lg mb-1"></i>
+                        <span class="text-xs">Profilo</span>
+                    </button>
+                `;
+            } else {
+                container.className = "grid grid-cols-4 h-16 max-w-lg mx-auto font-medium";
+                container.innerHTML = `
+                    <button onclick="switchTab('home')" id="m-btn-home" class="inline-flex flex-col items-center justify-center px-5 text-blue-700">
+                        <i class="fa-solid fa-house text-lg mb-1"></i>
+                        <span class="text-xs">Home</span>
+                    </button>
+                    <button onclick="switchTab('segna-ore')" id="m-btn-segna-ore" class="inline-flex flex-col items-center justify-center px-5 text-gray-500">
+                        <i class="fa-solid fa-user-clock text-lg mb-1"></i>
+                        <span class="text-xs">Segna</span>
+                    </button>
+                    <button onclick="switchTab('mie-ore')" id="m-btn-mie-ore" class="inline-flex flex-col items-center justify-center px-5 text-gray-500">
+                        <i class="fa-solid fa-calendar-days text-lg mb-1"></i>
+                        <span class="text-xs">Ore</span>
+                    </button>
+                    <button onclick="switchTab('profilo')" id="m-btn-profilo" class="inline-flex flex-col items-center justify-center px-5 text-gray-500">
+                        <i class="fa-solid fa-user text-lg mb-1"></i>
+                        <span class="text-xs">Profilo</span>
+                    </button>
+                `;
+            }
+        }
 
         async function handleLogin(event) {
-            event.preventDefault();
+            if(event) event.preventDefault();
             const userIn = document.getElementById('username').value.trim().toLowerCase();
             const passIn = document.getElementById('password').value;
             const errorDiv = document.getElementById('login-error');
@@ -388,53 +431,13 @@
                 return;
             }
 
-            errorDiv.classList.remove('hidden');
-        }
-
-        function buildMobileNav() {
-            const container = document.getElementById('mobile-nav-buttons');
-            if (currentUser.role === 'admin') {
-                container.className = "grid grid-cols-3 h-16 max-w-lg mx-auto font-medium";
-                container.innerHTML = `
-                    <button onclick="switchTab('adm-panel')" id="m-btn-adm-panel" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 text-purple-700">
-                        <i class="fa-solid fa-chart-pie text-lg mb-1"></i>
-                        <span class="text-xs">Ore</span>
-                    </button>
-                    <button onclick="switchTab('adm-users')" id="m-btn-adm-users" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 text-gray-500">
-                        <i class="fa-solid fa-users-gear text-lg mb-1"></i>
-                        <span class="text-xs">Utenti</span>
-                    </button>
-                    <button onclick="switchTab('profilo')" id="m-btn-profilo" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 text-gray-500">
-                        <i class="fa-solid fa-user text-lg mb-1"></i>
-                        <span class="text-xs">Profilo</span>
-                    </button>
-                `;
-            } else {
-                container.className = "grid grid-cols-4 h-16 max-w-lg mx-auto font-medium";
-                container.innerHTML = `
-                    <button onclick="switchTab('home')" id="m-btn-home" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 text-blue-700">
-                        <i class="fa-solid fa-house text-lg mb-1"></i>
-                        <span class="text-xs">Home</span>
-                    </button>
-                    <button onclick="switchTab('segna-ore')" id="m-btn-segna-ore" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 text-gray-500">
-                        <i class="fa-solid fa-user-clock text-lg mb-1"></i>
-                        <span class="text-xs">Segna</span>
-                    </button>
-                    <button onclick="switchTab('mie-ore')" id="m-btn-mie-ore" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 text-gray-500">
-                        <i class="fa-solid fa-calendar-days text-lg mb-1"></i>
-                        <span class="text-xs">Ore</span>
-                    </button>
-                    <button onclick="switchTab('profilo')" id="m-btn-profilo" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 text-gray-500">
-                        <i class="fa-solid fa-user text-lg mb-1"></i>
-                        <span class="text-xs">Profilo</span>
-                    </button>
-                `;
-            }
+            if(errorDiv) errorDiv.classList.remove('hidden');
         }
 
         function loginSuccess(userObj) {
-            document.getElementById('login-error').className = "hidden";
             currentUser = userObj;
+            // Salva sessão no localStorage do navegador para persistir após F5
+            localStorage.setItem('lbm_logged_session', JSON.stringify(currentUser));
 
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-panel').classList.remove('hidden');
@@ -456,7 +459,7 @@
                 document.getElementById('adm-menu-hours').classList.add('hidden');
                 document.getElementById('adm-menu-users').classList.add('hidden');
                 document.querySelectorAll('.user-only').forEach(el => el.classList.remove('hidden'));
-                document.getElementById('profile-role-display').innerText = "Ruolo: Operatore di Pulizia";
+                document.getElementById('profile-role-display').innerText = "Ruolo: Operatore";
                 document.getElementById('home-role-badge').innerText = "Operatore";
                 
                 switchTab('home');
@@ -466,6 +469,7 @@
 
         function handleLogout() {
             currentUser = null;
+            localStorage.removeItem('lbm_logged_session');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('main-panel').classList.add('hidden');
             document.getElementById('username').value = '';
@@ -474,7 +478,8 @@
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if(targetTab) targetTab.classList.remove('hidden');
 
             // Reset desktop buttons
             document.querySelectorAll('.menu-btn').forEach(btn => {
@@ -549,6 +554,7 @@
         }
 
         function updateUserUI() {
+            if(!dbUsers[currentUser.username]) return;
             const records = dbUsers[currentUser.username].records || [];
             
             let totalMinutos = 0;
@@ -596,7 +602,7 @@
             const totalDisplay = document.getElementById('adm-total-calc');
 
             if (!selectedUser || !dbUsers || !dbUsers[selectedUser]) {
-                tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Seleziona un dipendente valido.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Seleziona un dipendente.</td></tr>`;
                 totalDisplay.innerText = "00:00";
                 return;
             }
@@ -630,16 +636,20 @@
             }
         }
 
+        // CORREÇÃO CRUCIAL: SALVAMENTO DE USUÁRIOS
         async function handleCreateUser(event) {
             event.preventDefault();
             const name = document.getElementById('new-user-name').value.trim();
             const username = document.getElementById('new-user-username').value.trim().toLowerCase();
             const pass = document.getElementById('new-user-pass').value.trim();
 
-            if (username === 'admin' || (dbUsers && dbUsers[username])) {
+            if (username === 'admin' || dbUsers[username]) {
                 alert('Questo nome utente esiste già o non è valido!');
                 return;
             }
+
+            // Garante o recarregamento antes de injetar dados novos na nuvem
+            await loadDataFromCloud();
 
             dbUsers[username] = {
                 password: pass,
@@ -660,6 +670,7 @@
 
         async function deleteUser(username) {
             if (confirm(`Sei sicuro di voler eliminare definitivamente l'utente "${dbUsers[username].name}"?`)) {
+                await loadDataFromCloud();
                 delete dbUsers[username];
                 await saveDB();
                 renderAdmUsersList();
@@ -689,6 +700,26 @@
                 </tr>
             `).join('');
         }
+
+        // 2. SISTEMA DE PERSISTÊNCIA (MEMÓRIA) DE LOGIN
+        async function checkSession() {
+            await loadDataFromCloud();
+            const savedSession = localStorage.getItem('lbm_logged_session');
+            if (savedSession) {
+                const parsedUser = JSON.parse(savedSession);
+                // Valida as credenciais guardadas contra os dados atualizados da nuvem
+                if (parsedUser.username === MASTER_ADMIN.username && parsedUser.password === MASTER_ADMIN.password) {
+                    loginSuccess(MASTER_ADMIN);
+                } else if (dbUsers[parsedUser.username] && dbUsers[parsedUser.username].password === parsedUser.password) {
+                    loginSuccess({ username: parsedUser.username, ...dbUsers[parsedUser.username] });
+                } else {
+                    handleLogout();
+                }
+            }
+        }
+
+        // Inicia validando se já há um login feito anteriormente
+        checkSession();
     </script>
 </body>
 </html>
