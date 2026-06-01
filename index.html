@@ -13,7 +13,7 @@
     <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-100 px-4">
         <div class="w-full max-w-md p-8 bg-white border border-gray-200 rounded-xl shadow-md space-y-6">
             <div class="text-center space-y-4">
-                <img src="logolbm.png" alt="LBM Impresa di Pulizie" class="mx-auto h-40 w-auto object-contain">
+                <img src="logolbm.png" alt="LBM Impresa di Pulizie" class="mx-auto h-32 w-auto object-contain">
                 <p class="text-sm text-gray-500">Accedi con le tue credenziali autorizzate</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4">
@@ -25,7 +25,7 @@
                     <label class="block mb-2 text-sm font-medium text-gray-700">Password</label>
                     <input type="password" id="password" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
                 </div>
-                <div id="login-error" class="text-sm text-red-600 font-medium hidden">Credenziali errate o utente non esistente!</div>
+                <div id="login-error" class="text-sm text-red-600 font-medium hidden">Credenziali errate o errore di connessione!</div>
                 <button type="submit" class="w-full px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
                     Accedi
                 </button>
@@ -38,7 +38,7 @@
             <div class="h-full px-3 py-4 overflow-y-auto flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-center px-2 py-3 mb-6 border-b border-gray-100">
-                        <img src="logolbm.png" alt="LBM Logo" class="h-32 w-auto object-contain">
+                        <img src="logolbm.png" alt="LBM Logo" class="h-20 w-auto object-contain">
                     </div>
                     
                     <ul class="space-y-2 font-medium">
@@ -122,7 +122,7 @@
                 <div id="tab-segna-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Segna Ore</h1>
-                        <p class="text-sm text-gray-500">Inserisci i dettagli del tuo turno di lavoro</p>
+                        <p class="text-sm text-gray-500">Inserisci i dettagli del tuo turno di trabalho</p>
                     </div>
                     <div class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
                         <form onsubmit="salvareTurno(event)" class="space-y-4">
@@ -142,7 +142,7 @@
                             </div>
                             <div>
                                 <label class="block mb-2 text-sm font-medium text-gray-700">Note / Descrizione attività</label>
-                                <textarea id="turno-note" rows="3" placeholder="Descrivi il trabalho svolto..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></textarea>
+                                <textarea id="turno-note" rows="3" placeholder="Descrivi il lavoro svolto..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></textarea>
                             </div>
                             <div class="flex items-center space-x-4 pt-2">
                                 <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
@@ -297,35 +297,32 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO ADMINISTRADOR MASTER
         const MASTER_ADMIN = { username: "admin", password: "1570751", name: "Amministratore (Luan)", role: "admin" };
         let currentUser = null;
         let dbUsers = {};
 
-        // URL da Nuvem de Sincronização em tempo real (Gratuita e sem expiração)
-        // Usando um serviço público de armazenamento JSON seguro para o projeto
-        const CLOUD_BIN_ID = "lbm_empresa_pulizie_db_2026"; 
-        const CLOUD_URL = `https://jsonstorage.net/api/items/${CLOUD_BIN_ID}`;
+        // Banco de Dados Online Sincronizado Autocriável (Seguro e estável)
+        const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_ore_db";
 
         document.getElementById('turno-data').valueAsDate = new Date();
 
-        // Carrega os dados da nuvem assim que o site abre
         async function loadDataFromCloud() {
             try {
                 const response = await fetch(CLOUD_URL);
                 if (response.ok) {
-                    const data = await response.json();
-                    dbUsers = data || {};
-                } else {
-                    // Se o banco estiver vazio na primeira vez, cria contas de teste
+                    const text = await response.text();
+                    dbUsers = text ? JSON.parse(text) : null;
+                }
+                
+                if (!dbUsers || Object.keys(dbUsers).length === 0) {
                     dbUsers = {
                         "funcionario1": { password: "456", name: "Mario Rossi", role: "user", records: [] },
-                        "funcionario2": { password: "789", name: "Ana Silva", role: "user", records: [] }
+                        "ana": { password: "123", name: "Ana Silva", role: "user", records: [] }
                     };
                     await saveDB();
                 }
             } catch (e) {
-                console.log("Erro ao conectar na nuvem, usando backup local temporário.");
+                console.log("Erro de conexão, carregando cópia local.");
                 dbUsers = JSON.parse(localStorage.getItem('lbm_users_db')) || {};
             }
         }
@@ -334,16 +331,15 @@
             localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
             try {
                 await fetch(CLOUD_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
                     body: JSON.stringify(dbUsers)
                 });
             } catch (e) {
-                console.error("Erro ao sincronizar dados na nuvem.");
+                console.error("Erro ao sincronizar na nuvem.");
             }
         }
 
-        // Inicializa carregando os dados globais da internet
+        // Executa a carga inicial assim que a página abre
         loadDataFromCloud();
 
         async function handleLogin(event) {
@@ -352,8 +348,7 @@
             const passIn = document.getElementById('password').value;
             const errorDiv = document.getElementById('login-error');
 
-            // Recarrega os dados antes de checar o login para garantir novos usuários
-            await loadDataFromCloud();
+            await loadDataFromCloud(); // Sincroniza dados antes de checar
 
             if (userIn === MASTER_ADMIN.username && passIn === MASTER_ADMIN.password) {
                 loginSuccess(MASTER_ADMIN);
@@ -437,7 +432,7 @@
             const partesData = dataRaw.split('-');
             const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
 
-            await loadDataFromCloud(); // Atualiza antes de salvar
+            await loadDataFromCloud(); 
 
             if(!dbUsers[currentUser.username].records) dbUsers[currentUser.username].records = [];
             
@@ -449,7 +444,7 @@
                 rawMonth: partesData[1]
             });
 
-            await saveDB(); // Salva direto na nuvem global
+            await saveDB(); 
             updateUserUI();
 
             const status = document.getElementById('statusPonto');
@@ -523,7 +518,7 @@
             let totalMinutos = 0;
             records.forEach(r => {
                 const partes = r.ore.split(':');
-                totalMinutos += ((parseInt(partes[0]) || 0) * 60) + (parseInt(partes[1]) || 0);
+                totalMinutos += ((parseInt(partes[0]) || 0) * 60) + (parseInt(passInt(partes[1]) || 0));
             });
             const hTotal = Math.floor(totalMinutos / 60);
             const mTotal = totalMinutos % 60;
@@ -568,11 +563,11 @@
             document.getElementById('new-user-name').value = '';
             document.getElementById('new-user-username').value = '';
             document.getElementById('new-user-pass').value = '';
-            alert(`Utente ${name} creato con successo ed è online!`);
+            alert(`Utente ${name} creato com sucesso e sincronizado online!`);
         }
 
         async function deleteUser(username) {
-            if (confirm(`Sei sicuro di voler eliminare definitivamente l'utente "${dbUsers[username].name}" e tutti i suoi registri orari?`)) {
+            if (confirm(`Sei sicuro di voler eliminare definitivamente l'utente "${dbUsers[username].name}" e tutti i suoi registri?`)) {
                 delete dbUsers[username];
                 await saveDB();
                 renderAdmUsersList();
