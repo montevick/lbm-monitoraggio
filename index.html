@@ -31,7 +31,7 @@
                     <input type="password" id="password" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
                 </div>
                 <div id="login-error" class="text-sm text-red-600 font-medium hidden">Credenziali errate o errore di connessione!</div>
-                <button type="submit" class="w-full px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
+                <button type="submit" id="btn-login-submit" class="w-full px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
                     Accedi
                 </button>
             </form>
@@ -45,7 +45,8 @@
             <button onclick="handleLogout()" class="text-red-600 p-2 text-sm font-medium flex items-center space-x-1">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Esci</span>
-            </header>
+            </button>
+        </header>
 
         <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-white border-r border-gray-200 hidden md:flex flex-col justify-between px-3 py-4">
             <div>
@@ -137,7 +138,7 @@
                 <div id="tab-segna-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Segna Ore</h1>
-                        <p class="text-xs text-gray-500">Inserisci i dettagli del tuo turno di lavoro</p>
+                        <p class="text-xs text-gray-500">Inserisci i detalhes do teu turno</p>
                     </div>
                     <div class="p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
                         <form onsubmit="salvareTurno(event)" class="space-y-4">
@@ -246,7 +247,7 @@
                 <div id="tab-adm-users" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-purple-800">Gestione Utenti Dipendenti</h1>
-                        <p class="text-xs text-gray-500">Crea o rimuovi i profili di acesso</p>
+                        <p class="text-xs text-gray-500">Crea o rimuovi i profili di accesso</p>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -318,29 +319,36 @@
 
         const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_database_v2";
 
-        // Carrega do LocalStorage primeiro para evitar congelamento de tela
-        const local = localStorage.getItem('lbm_users_db');
-        if (local) {
-            try { dbUsers = JSON.parse(local); } catch(e) { dbUsers = {}; }
+        // Tenta carregar os dados locais imediatamente para não travar a tela
+        function loadLocalData() {
+            const local = localStorage.getItem('lbm_users_db');
+            if (local) {
+                try { dbUsers = JSON.parse(local); } catch(e) { dbUsers = {}; }
+            }
         }
+        loadLocalData();
 
+        // Puxa os dados atualizados da nuvem de forma limpa e segura
         async function loadDataFromCloud() {
             try {
-                const response = await fetch(CLOUD_URL);
+                const response = await fetch(CLOUD_URL + '?t=' + new Date().getTime()); // Evita cache do navegador
                 if (response.ok) {
                     const text = await response.text();
                     if (text && text.trim().startsWith('{')) {
-                        dbUsers = JSON.parse(text);
-                        localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
+                        const parsed = JSON.parse(text);
+                        if (Object.keys(parsed).length > 0) {
+                            dbUsers = parsed;
+                            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
+                        }
                     }
                 }
             } catch (e) {
-                console.log("Errore sincronizzazione Cloud. Uso dati locali.");
+                console.log("Errore sincro Cloud, uso locali.");
             }
 
             if (!dbUsers || Object.keys(dbUsers).length === 0) {
                 dbUsers = {
-                    "ana": { password: "123", name: "Ana Silva", role: "user", records: [] }
+                    "ana": { password: "123", name: "Ana Almeida", role: "user", records: [] }
                 };
                 await saveDB();
             }
@@ -351,7 +359,8 @@
             try {
                 await fetch(CLOUD_URL, {
                     method: 'POST',
-                    body: JSON.stringify(dbUsers)
+                    body: JSON.stringify(dbUsers),
+                    headers: { 'Content-Type': 'application/json' }
                 });
             } catch (e) {
                 console.error("Errore invio dati al Cloud.");
@@ -403,13 +412,19 @@
 
         async function handleLogin(event) {
             if(event) event.preventDefault();
+            const btn = document.getElementById('btn-login-submit');
+            if(btn) btn.innerText = "Caricamento...";
+
             const userIn = document.getElementById('username').value.trim().toLowerCase();
             const passIn = document.getElementById('password').value;
             const errorDiv = document.getElementById('login-error');
 
             if(errorDiv) errorDiv.classList.add('hidden');
 
+            // Força o carregamento da nuvem ANTES de validar
             await loadDataFromCloud(); 
+
+            if(btn) btn.innerText = "Accedi";
 
             if (userIn === MASTER_ADMIN.username && passIn === MASTER_ADMIN.password) {
                 loginSuccess(MASTER_ADMIN);
@@ -531,7 +546,7 @@
 
             const status = document.getElementById('statusPonto');
             if(status) {
-                status.innerText = "Registrato con successo Online!";
+                status.innerText = "Registrato con successo!";
                 setTimeout(() => { status.innerText = ''; }, 3000);
             }
             document.getElementById('turno-ore').value = '';
@@ -642,6 +657,7 @@
                 return;
             }
 
+            // Puxa o banco fresco da nuvem antes de adicionar para não apagar ninguém
             await loadDataFromCloud();
 
             dbUsers[username] = {
@@ -695,12 +711,12 @@
             `).join('');
         }
 
-        // ================= INICIALIZAÇÃO SEGURA (ESPERA O HTML CARREGAR) =================
+        // ================= INICIALIZAÇÃO FIXA E SEGURA =================
         window.addEventListener('DOMContentLoaded', async () => {
             const dateInput = document.getElementById('turno-data');
             if(dateInput) dateInput.valueAsDate = new Date();
             
-            // Tenta validar a sessão existente usando dados locais imediatos
+            // 1. Tenta carregar a sessão salva na hora
             const savedSession = localStorage.getItem('lbm_logged_session');
             if (savedSession) {
                 try {
@@ -715,10 +731,9 @@
                 }
             }
 
-            // Sincroniza em segundo plano com a nuvem sem travar a interface
+            // 2. Atualiza a nuvem por trás sem travar a interface do telemóvel
             await loadDataFromCloud();
             
-            // Se o admin já estava logado, atualiza as listas com os dados novos da nuvem
             if (currentUser && currentUser.role === 'admin') {
                 buildAdmSelectors();
                 renderAdmUsersList();
