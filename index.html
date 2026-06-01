@@ -15,7 +15,6 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans antialiased">
 
-    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-100 px-4">
         <div class="w-full max-w-md p-6 sm:p-8 bg-white border border-gray-200 rounded-xl shadow-md space-y-6">
             <div class="text-center space-y-4">
@@ -39,19 +38,15 @@
         </div>
     </div>
 
-    <!-- PAINEL PRINCIPAL -->
     <div id="main-panel" class="hidden">
         
-        <!-- HEADER PARA MOBILE -->
         <header class="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-30">
             <img src="logolbm.png" alt="LBM Logo" class="h-10 w-auto object-contain">
             <button onclick="handleLogout()" class="text-red-600 p-2 text-sm font-medium flex items-center space-x-1">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Esci</span>
-            </button>
-        </header>
+            </header>
 
-        <!-- MENU LATERAL (DESKTOP) -->
         <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-white border-r border-gray-200 hidden md:flex flex-col justify-between px-3 py-4">
             <div>
                 <div class="flex items-center justify-center px-2 py-3 mb-6 border-b border-gray-100">
@@ -109,16 +104,13 @@
             </div>
         </aside>
 
-        <!-- BARRA INFERIOR (MOBILE) -->
         <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-lg">
             <div class="grid grid-cols-4 h-16 max-w-lg mx-auto font-medium" id="mobile-nav-buttons"></div>
         </nav>
 
-        <!-- CONTEÚDO PRINCIPAL -->
         <div class="md:pl-64 bg-gray-50 min-h-screen pb-mobile">
             <div class="p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
                 
-                <!-- 1. HOME -->
                 <div id="tab-home" class="tab-content space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Benvenuto, <span class="user-display">Utente</span></h1>
@@ -142,7 +134,6 @@
                     </div>
                 </div>
 
-                <!-- 2. SEGNA ORE -->
                 <div id="tab-segna-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Segna Ore</h1>
@@ -166,7 +157,7 @@
                             </div>
                             <div>
                                 <label class="block mb-1 text-sm font-medium text-gray-700">Note / Descrizione attività</label>
-                                <textarea id="turno-note" rows="3" placeholder="Descrivi il trabalho svolto..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></textarea>
+                                <textarea id="turno-note" rows="3" placeholder="Descrivi il lavoro svolto..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></textarea>
                             </div>
                             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 pt-2">
                                 <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
@@ -178,7 +169,6 @@
                     </div>
                 </div>
 
-                <!-- 3. MIE ORE -->
                 <div id="tab-mie-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Mie Ore</h1>
@@ -201,7 +191,6 @@
                     </div>
                 </div>
 
-                <!-- 4. ADM - CONTROLLO ORE -->
                 <div id="tab-adm-panel" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-purple-800">Pannello Controllo Ore</h1>
@@ -254,11 +243,10 @@
                     </div>
                 </div>
 
-                <!-- 5. ADM - GESTIONE UTENTI -->
                 <div id="tab-adm-users" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-purple-800">Gestione Utenti Dipendenti</h1>
-                        <p class="text-xs text-gray-500">Crea o rimuovi i profili di accesso</p>
+                        <p class="text-xs text-gray-500">Crea o rimuovi i profili di acesso</p>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -302,7 +290,6 @@
                     </div>
                 </div>
 
-                <!-- 6. PROFILO -->
                 <div id="tab-profilo" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Profilo Utente</h1>
@@ -331,9 +318,12 @@
 
         const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_database_v2";
 
-        document.getElementById('turno-data').valueAsDate = new Date();
+        // Carrega do LocalStorage primeiro para evitar congelamento de tela
+        const local = localStorage.getItem('lbm_users_db');
+        if (local) {
+            try { dbUsers = JSON.parse(local); } catch(e) { dbUsers = {}; }
+        }
 
-        // 1. CARREGAMENTO INICIAL CORRIGIDO
         async function loadDataFromCloud() {
             try {
                 const response = await fetch(CLOUD_URL);
@@ -345,14 +335,12 @@
                     }
                 }
             } catch (e) {
-                console.log("Errore connessione cloud. Uso locale.");
-                const local = localStorage.getItem('lbm_users_db');
-                if(local) dbUsers = JSON.parse(local);
+                console.log("Errore sincronizzazione Cloud. Uso dati locali.");
             }
 
             if (!dbUsers || Object.keys(dbUsers).length === 0) {
                 dbUsers = {
-                    "ana": { password: "123", name: "Ana Almeida", role: "user", records: [] }
+                    "ana": { password: "123", name: "Ana Silva", role: "user", records: [] }
                 };
                 await saveDB();
             }
@@ -366,7 +354,7 @@
                     body: JSON.stringify(dbUsers)
                 });
             } catch (e) {
-                console.error("Errore sincronizzazione Cloud.");
+                console.error("Errore invio dati al Cloud.");
             }
         }
 
@@ -419,6 +407,8 @@
             const passIn = document.getElementById('password').value;
             const errorDiv = document.getElementById('login-error');
 
+            if(errorDiv) errorDiv.classList.add('hidden');
+
             await loadDataFromCloud(); 
 
             if (userIn === MASTER_ADMIN.username && passIn === MASTER_ADMIN.password) {
@@ -436,7 +426,6 @@
 
         function loginSuccess(userObj) {
             currentUser = userObj;
-            // Salva sessão no localStorage do navegador para persistir após F5
             localStorage.setItem('lbm_logged_session', JSON.stringify(currentUser));
 
             document.getElementById('login-screen').classList.add('hidden');
@@ -481,14 +470,12 @@
             const targetTab = document.getElementById(`tab-${tabId}`);
             if(targetTab) targetTab.classList.remove('hidden');
 
-            // Reset desktop buttons
             document.querySelectorAll('.menu-btn').forEach(btn => {
                 btn.className = "w-full flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 menu-btn";
                 const icon = btn.querySelector('i');
                 if (icon) icon.className = icon.className.replace('text-blue-700', 'text-gray-500').replace('text-purple-700', 'text-gray-500');
             });
 
-            // Reset mobile buttons
             const mobContainer = document.getElementById('mobile-nav-buttons');
             if (mobContainer) {
                 mobContainer.querySelectorAll('button').forEach(btn => {
@@ -499,7 +486,6 @@
 
             const activeColor = currentUser.role === 'admin' ? 'text-purple-700' : 'text-blue-700';
 
-            // Active Desktop
             const activeBtn = document.getElementById(`btn-${tabId}`);
             if(activeBtn) {
                 const bgClass = currentUser.role === 'admin' ? 'bg-purple-50' : 'bg-blue-50';
@@ -508,7 +494,6 @@
                 if (activeIcon) activeIcon.className = activeIcon.className.replace('text-gray-500', activeColor);
             }
 
-            // Active Mobile
             const activeMobBtn = document.getElementById(`m-btn-${tabId}`);
             if (activeMobBtn) {
                 activeMobBtn.classList.remove('text-gray-500');
@@ -545,16 +530,17 @@
             updateUserUI();
 
             const status = document.getElementById('statusPonto');
-            status.innerText = "Registrato con successo Online!";
+            if(status) {
+                status.innerText = "Registrato con successo Online!";
+                setTimeout(() => { status.innerText = ''; }, 3000);
+            }
             document.getElementById('turno-ore').value = '';
             document.getElementById('turno-luogo').value = '';
             document.getElementById('turno-note').value = '';
-
-            setTimeout(() => { status.innerText = ''; }, 3000);
         }
 
         function updateUserUI() {
-            if(!dbUsers[currentUser.username]) return;
+            if(!currentUser || !dbUsers[currentUser.username]) return;
             const records = dbUsers[currentUser.username].records || [];
             
             let totalMinutos = 0;
@@ -564,26 +550,31 @@
             });
             const hTotal = Math.floor(totalMinutos / 60);
             const mTotal = totalMinutos % 60;
-            document.getElementById('home-ore-mese').innerText = `${String(hTotal).padStart(2, '0')}:${String(mTotal).padStart(2, '0')} Ore`;
+            
+            const homeOre = document.getElementById('home-ore-mese');
+            if(homeOre) homeOre.innerText = `${String(hTotal).padStart(2, '0')}:${String(mTotal).padStart(2, '0')} Ore`;
 
             const tabelaUser = document.getElementById('all-records-table');
-            if (records.length === 0) {
-                tabelaUser.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno registrato.</td></tr>`;
-            } else {
-                tabelaUser.innerHTML = records.map(r => `
-                    <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">${r.data}</td>
-                        <td class="px-4 py-3">${r.luogo}</td>
-                        <td class="px-4 py-3 font-bold text-blue-600">${r.ore}</td>
-                        <td class="px-4 py-3 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
-                    </tr>
-                `).join('');
+            if(tabelaUser) {
+                if (records.length === 0) {
+                    tabelaUser.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno registrato.</td></tr>`;
+                } else {
+                    tabelaUser.innerHTML = records.map(r => `
+                        <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
+                            <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">${r.data}</td>
+                            <td class="px-4 py-3">${r.luogo}</td>
+                            <td class="px-4 py-3 font-bold text-blue-600">${r.ore}</td>
+                            <td class="px-4 py-3 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
+                        </tr>
+                    `).join('');
+                }
             }
         }
 
         // ================= OPERAÇÕES DO ADMINISTRADOR =================
         function buildAdmSelectors() {
             const userSelect = document.getElementById('adm-select-user');
+            if(!userSelect) return;
             const keys = Object.keys(dbUsers || {});
             
             if(keys.length === 0) {
@@ -596,14 +587,16 @@
         }
 
         function renderAdmHours() {
-            const selectedUser = document.getElementById('adm-select-user').value;
+            const selectEl = document.getElementById('adm-select-user');
+            if(!selectEl) return;
+            const selectedUser = selectEl.value;
             const selectedMonth = document.getElementById('adm-select-month').value;
             const tableBody = document.getElementById('adm-filtered-table');
             const totalDisplay = document.getElementById('adm-total-calc');
 
             if (!selectedUser || !dbUsers || !dbUsers[selectedUser]) {
-                tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Seleziona un dipendente.</td></tr>`;
-                totalDisplay.innerText = "00:00";
+                if(tableBody) tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Seleziona un dipendente.</td></tr>`;
+                if(totalDisplay) totalDisplay.innerText = "00:00";
                 return;
             }
 
@@ -620,23 +613,24 @@
             });
             const hTotal = Math.floor(totalMinutos / 60);
             const mTotal = totalMinutos % 60;
-            totalDisplay.innerText = `${String(hTotal).padStart(2, '0')}:${String(mTotal).padStart(2, '0')}`;
+            if(totalDisplay) totalDisplay.innerText = `${String(hTotal).padStart(2, '0')}:${String(mTotal).padStart(2, '0')}`;
 
-            if (records.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno trovato.</td></tr>`;
-            } else {
-                tableBody.innerHTML = records.map(r => `
-                    <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
-                        <td class="px-4 py-3 text-gray-900 font-medium">${r.data}</td>
-                        <td class="px-4 py-3">${r.luogo}</td>
-                        <td class="px-4 py-3 font-bold text-purple-700">${r.ore}</td>
-                        <td class="px-4 py-3 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
-                    </tr>
-                `).join('');
+            if(tableBody) {
+                if (records.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno trovato.</td></tr>`;
+                } else {
+                    tableBody.innerHTML = records.map(r => `
+                        <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
+                            <td class="px-4 py-3 text-gray-900 font-medium">${r.data}</td>
+                            <td class="px-4 py-3">${r.luogo}</td>
+                            <td class="px-4 py-3 font-bold text-purple-700">${r.ore}</td>
+                            <td class="px-4 py-3 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
+                        </tr>
+                    `).join('');
+                }
             }
         }
 
-        // CORREÇÃO CRUCIAL: SALVAMENTO DE USUÁRIOS
         async function handleCreateUser(event) {
             event.preventDefault();
             const name = document.getElementById('new-user-name').value.trim();
@@ -648,7 +642,6 @@
                 return;
             }
 
-            // Garante o recarregamento antes de injetar dados novos na nuvem
             await loadDataFromCloud();
 
             dbUsers[username] = {
@@ -680,6 +673,7 @@
 
         function renderAdmUsersList() {
             const table = document.getElementById('adm-users-list-table');
+            if(!table) return;
             const keys = Object.keys(dbUsers || {});
 
             if(keys.length === 0) {
@@ -701,25 +695,37 @@
             `).join('');
         }
 
-        // 2. SISTEMA DE PERSISTÊNCIA (MEMÓRIA) DE LOGIN
-        async function checkSession() {
-            await loadDataFromCloud();
+        // ================= INICIALIZAÇÃO SEGURA (ESPERA O HTML CARREGAR) =================
+        window.addEventListener('DOMContentLoaded', async () => {
+            const dateInput = document.getElementById('turno-data');
+            if(dateInput) dateInput.valueAsDate = new Date();
+            
+            // Tenta validar a sessão existente usando dados locais imediatos
             const savedSession = localStorage.getItem('lbm_logged_session');
             if (savedSession) {
-                const parsedUser = JSON.parse(savedSession);
-                // Valida as credenciais guardadas contra os dados atualizados da nuvem
-                if (parsedUser.username === MASTER_ADMIN.username && parsedUser.password === MASTER_ADMIN.password) {
-                    loginSuccess(MASTER_ADMIN);
-                } else if (dbUsers[parsedUser.username] && dbUsers[parsedUser.username].password === parsedUser.password) {
-                    loginSuccess({ username: parsedUser.username, ...dbUsers[parsedUser.username] });
-                } else {
-                    handleLogout();
+                try {
+                    const parsedUser = JSON.parse(savedSession);
+                    if (parsedUser.username === MASTER_ADMIN.username && parsedUser.password === MASTER_ADMIN.password) {
+                        loginSuccess(MASTER_ADMIN);
+                    } else if (dbUsers[parsedUser.username] && dbUsers[parsedUser.username].password === parsedUser.password) {
+                        loginSuccess({ username: parsedUser.username, ...dbUsers[parsedUser.username] });
+                    }
+                } catch(e) {
+                    localStorage.removeItem('lbm_logged_session');
                 }
             }
-        }
 
-        // Inicia validando se já há um login feito anteriormente
-        checkSession();
+            // Sincroniza em segundo plano com a nuvem sem travar a interface
+            await loadDataFromCloud();
+            
+            // Se o admin já estava logado, atualiza as listas com os dados novos da nuvem
+            if (currentUser && currentUser.role === 'admin') {
+                buildAdmSelectors();
+                renderAdmUsersList();
+            } else if (currentUser) {
+                updateUserUI();
+            }
+        });
     </script>
 </body>
 </html>
