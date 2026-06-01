@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LBM - Gestione Ore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased">
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-100 px-4">
+        <div class="w-full max-w-md p-8 bg-white border border-gray-200 rounded-xl shadow-md space-y-6">
+            <div class="text-center space-y-4">
+                <!-- Logo Oficial da LBM na Tela de Login -->
+                <img src="logolbm.png" alt="LBM Impresa di Pulizie" class="mx-auto h-24 w-auto object-contain">
+                <p class="text-sm text-gray-500">Accedi con le tue credenziali autorizzate</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-gray-700">Nome Utente</label>
+                    <input type="text" id="username" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Esempio: admin o mario">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
+                </div>
+                <div id="login-error" class="text-sm text-red-600 font-medium hidden">Credenziali errate o non autorizzate!</div>
+                <button type="submit" class="w-full px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
+                    Accedi
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAINEL PRINCIPAL -->
+    <div id="main-panel" class="hidden">
+        <!-- MENU LATERAL (SIDEBAR) -->
+        <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-white border-r border-gray-200 block" aria-label="Sidebar">
+            <div class="h-full px-3 py-4 overflow-y-auto flex flex-col justify-between">
+                <div>
+                    <!-- Logo Oficial da LBM no Topo do Menu -->
+                    <div class="flex items-center justify-center px-2 py-3 mb-6 border-b border-gray-100">
+                        <img src="logolbm.png" alt="LBM Logo" class="h-14 w-auto object-contain">
+                    </div>
+                    
+                    <ul class="space-y-2 font-medium">
+                        <li>
+                            <button onclick="switchTab('home')" id="btn-home" class="w-full flex items-center p-2 text-blue-700 bg-blue-50 rounded-lg menu-btn">
+                                <i class="fa-solid fa-house w-5 h-5"></i>
+                                <span class="ms-3">Home</span>
+                            </button>
+                        </li>
+                        <!-- Abas exclusivas do Funcionário -->
+                        <li class="user-only">
+                            <button onclick="switchTab('segna-ore')" id="btn-segna-ore" class="w-full flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 menu-btn">
+                                <i class="fa-solid fa-user-clock w-5 h-5 text-gray-500"></i>
+                                <span class="ms-3">Segna Ore</span>
+                            </button>
+                        </li>
+                        <li class="user-only">
+                            <button onclick="switchTab('mie-ore')" id="btn-mie-ore" class="w-full flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 menu-btn">
+                                <i class="fa-solid fa-calendar-days w-5 h-5 text-gray-500"></i>
+                                <span class="ms-3">Mie Ore</span>
+                            </button>
+                        </li>
+                        <!-- ABA EXCLUSIVA DO ADM -->
+                        <li id="adm-menu-item" class="hidden">
+                            <button onclick="switchTab('adm-panel')" id="btn-adm-panel" class="w-full flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 menu-btn">
+                                <i class="fa-solid fa-unlock-keyhole w-5 h-5 text-gray-500"></i>
+                                <span class="ms-3 font-bold text-purple-700">Pannello ADM</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button onclick="switchTab('profilo')" id="btn-profilo" class="w-full flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 menu-btn">
+                                <i class="fa-solid fa-user w-5 h-5 text-gray-500"></i>
+                                <span class="ms-3">Profilo</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <hr class="my-2 border-gray-200">
+                    <button onclick="handleLogout()" class="w-full flex items-center p-2 text-red-600 rounded-lg hover:bg-red-50 group">
+                        <i class="fa-solid fa-right-from-bracket w-5 h-5 text-red-500"></i>
+                        <span class="ms-3 text-left">Esci</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="pl-64 bg-gray-50 min-h-screen">
+            <div class="p-8 max-w-5xl mx-auto space-y-6">
+                
+                <!-- 1. HOME -->
+                <div id="tab-home" class="tab-content space-y-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Benvenuto, <span class="user-display">Utente</span></h1>
+                        <p class="text-sm text-gray-500">Riepilogo generale delle attività</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm flex items-center space-x-4">
+                            <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><i class="fa-solid fa-calendar-check text-xl"></i></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Ore inserite questo mese</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1" id="home-ore-mese">00:00 Ore</p>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm flex items-center space-x-4">
+                            <div class="p-3 bg-gray-50 text-gray-600 rounded-lg"><i class="fa-solid fa-users text-xl"></i></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Tipo di Account</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1" id="home-role-display">Operatore</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. SEGNA ORE -->
+                <div id="tab-segna-ore" class="tab-content hidden space-y-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Segna Ore</h1>
+                        <p class="text-sm text-gray-500">Inserisci i dettagli del tuo turno di lavoro</p>
+                    </div>
+                    <div class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
+                        <form onsubmit="salvareTurno(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block mb-2 text-sm font-medium text-gray-700">Data del turno</label>
+                                    <input type="date" id="turno-data" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm">
+                                </div>
+                                <div>
+                                    <label class="block mb-2 text-sm font-medium text-gray-700">Ore lavorate</label>
+                                    <input type="text" id="turno-ore" placeholder="Es. 08:30" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm">
+                                </div>
+                                <div>
+                                    <label class="block mb-2 text-sm font-medium text-gray-700">Luogo di lavoro</label>
+                                    <input type="text" id="turno-luogo" placeholder="Es. Ufficio / Palestra" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-700">Note / Descrizione attività</label>
+                                <textarea id="turno-note" rows="3" placeholder="Descrivi il lavoro svolto..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></textarea>
+                            </div>
+                            <div class="flex items-center space-x-4 pt-2">
+                                <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
+                                    Salva Registro
+                                </button>
+                                <div id="statusPonto" class="text-sm font-medium text-green-600"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 3. MIE ORE -->
+                <div id="tab-mie-ore" class="tab-content hidden space-y-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Mie Ore</h1>
+                        <p class="text-sm text-gray-500">Storico dettagliato dei tuoi turni salvati</p>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Data</th>
+                                        <th scope="col" class="px-6 py-3">Luogo</th>
+                                        <th scope="col" class="px-6 py-3">Ore</th>
+                                        <th scope="col" class="px-6 py-3">Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-records-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. VISTA EXCLUSIVA DO ADM (CONTROLE DE TODAS AS ORES) -->
+                <div id="tab-adm-panel" class="tab-content hidden space-y-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-purple-800">Pannello Controllo Amministratore (ADM)</h1>
+                        <p class="text-sm text-gray-500">Visualizzazione globale dei turni inseriti da tutti i dipendenti</p>
+                    </div>
+                    <div class="bg-white border border-purple-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-purple-700 uppercase bg-purple-50 border-b border-purple-200">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Dipendente</th>
+                                        <th scope="col" class="px-6 py-3">Data</th>
+                                        <th scope="col" class="px-6 py-3">Luogo</th>
+                                        <th scope="col" class="px-6 py-3">Ore</th>
+                                        <th scope="col" class="px-6 py-3">Note/Descrizione</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adm-all-records-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. PROFILO -->
+                <div id="tab-profilo" class="tab-content hidden space-y-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Profilo Utente</h1>
+                    </div>
+                    <div class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm space-y-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full text-2xl font-bold">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800 user-display">Utente</h2>
+                                <p class="text-sm text-gray-500" id="profile-role-display">Ruolo: Operatore</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // LISTA OFICIAL DE LOGINS PERMITIDOS
+        const USERS_DATABASE = {
+            "admin": { password: "123", name: "Amministratore (Luan)", role: "admin" },
+            "funcionario1": { password: "456", name: "Mario Rossi", role: "user" },
+            "funcionario2": { password: "789", name: "Ana Silva", role: "user" }
+        };
+
+        let currentUser = null;
+        let dbData = JSON.parse(localStorage.getItem('cleaning_system_db')) || {};
+
+        document.getElementById('turno-data').valueAsDate = new Date();
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const userIn = document.getElementById('username').value.trim().toLowerCase();
+            const passIn = document.getElementById('password').value;
+            const errorDiv = document.getElementById('login-error');
+
+            if (USERS_DATABASE[userIn] && USERS_DATABASE[userIn].password === passIn) {
+                errorDiv.classList.add('hidden');
+                currentUser = userIn;
+                
+                if (!dbData[currentUser]) {
+                    dbData[currentUser] = { name: USERS_DATABASE[currentUser].name, records: [] };
+                    saveDB();
+                }
+
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-panel').classList.remove('hidden');
+                
+                document.querySelectorAll('.user-display').forEach(el => el.innerText = USERS_DATABASE[currentUser].name);
+                document.getElementById('home-role-display').innerText = USERS_DATABASE[currentUser].role === 'admin' ? 'Amministratore' : 'Operatore';
+                document.getElementById('profile-role-display').innerText = `Ruolo: ${USERS_DATABASE[currentUser].role === 'admin' ? 'Amministratore' : 'Operatore di Pulizia'}`;
+
+                if (USERS_DATABASE[currentUser].role === 'admin') {
+                    document.getElementById('adm-menu-item').classList.remove('hidden');
+                    document.querySelectorAll('.user-only').forEach(el => el.classList.add('hidden'));
+                    switchTab('adm-panel');
+                } else {
+                    document.getElementById('adm-menu-item').classList.add('hidden');
+                    document.querySelectorAll('.user-only').forEach(el => el.classList.remove('hidden'));
+                    switchTab('home');
+                }
+                updateUI();
+            } else {
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-panel').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.menu-btn').forEach(btn => {
+                btn.className = "w-full flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 menu-btn";
+                const icon = btn.querySelector('i');
+                if (icon) icon.className = icon.className.replace('text-blue-700', 'text-gray-500');
+            });
+
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if(activeBtn) {
+                activeBtn.className = "w-full flex items-center p-2 text-blue-700 bg-blue-50 rounded-lg menu-btn";
+                const activeIcon = activeBtn.querySelector('i');
+                if (activeIcon) activeIcon.className = activeIcon.className.replace('text-gray-500', 'text-blue-700');
+            }
+        }
+
+        function salvareTurno(event) {
+            event.preventDefault();
+            if (!currentUser) return;
+
+            const dataRaw = document.getElementById('turno-data').value;
+            const ore = document.getElementById('turno-ore').value.trim();
+            const luogo = document.getElementById('turno-luogo').value.trim();
+            const note = document.getElementById('turno-note').value.trim();
+
+            const partesData = dataRaw.split('-');
+            const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
+
+            dbData[currentUser].records.unshift({
+                data: dataFormatada,
+                ore: ore,
+                luogo: luogo,
+                note: note || '-'
+            });
+
+            saveDB();
+            updateUI();
+
+            const status = document.getElementById('statusPonto');
+            status.innerText = "Registrato con successo!";
+            document.getElementById('turno-ore').value = '';
+            document.getElementById('turno-luogo').value = '';
+            document.getElementById('turno-note').value = '';
+
+            setTimeout(() => { status.innerText = ''; }, 3000);
+        }
+
+        function updateUI() {
+            if (!currentUser) return;
+
+            const userRecords = dbData[currentUser].records || [];
+            let totalMinutos = 0;
+            userRecords.forEach(r => {
+                const partes = r.ore.split(':');
+                const h = parseInt(partes[0]) || 0;
+                const m = parseInt(partes[1]) || 0;
+                totalMinutos += (h * 60) + m;
+            });
+            const hTotal = Math.floor(totalMinutos / 60);
+            const mTotal = totalMinutos % 60;
+            document.getElementById('home-ore-mese').innerText = `${String(hTotal).padStart(2, '0')}:${String(mTotal).padStart(2, '0')} Ore`;
+
+            const tabelaUser = document.getElementById('all-records-table');
+            if(tabelaUser) {
+                if (userRecords.length === 0) {
+                    tabelaUser.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-400 italic">Nessun turno registrato.</td></tr>`;
+                } else {
+                    tabelaUser.innerHTML = userRecords.map(r => `
+                        <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
+                            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${r.data}</td>
+                            <td class="px-6 py-4">${r.luogo}</td>
+                            <td class="px-6 py-4 font-bold text-blue-600">${r.ore}</td>
+                            <td class="px-6 py-4 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            const tabelaAdm = document.getElementById('adm-all-records-table');
+            if(tabelaAdm) {
+                let htmlAcumulado = '';
+                Object.keys(dbData).forEach(usrKey => {
+                    const registrosDoCara = dbData[usrKey].records || [];
+                    const nomeDoCara = dbData[usrKey].name;
+                    
+                    registrosDoCara.forEach(r => {
+                        htmlAcumulado += `
+                            <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-6 py-4 font-bold text-purple-700">${nomeDoCara}</td>
+                                <td class="px-6 py-4 text-gray-900">${r.data}</td>
+                                <td class="px-6 py-4">${r.luogo}</td>
+                                <td class="px-6 py-4 font-bold text-blue-600">${r.ore}</td>
+                                <td class="px-6 py-4 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                if (htmlAcumulado === '') {
+                    tabelaAdm.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-400 italic">Nessun dato inserito dai dipendenti.</td></tr>`;
+                } else {
+                    tabelaAdm.innerHTML = htmlAcumulado;
+                }
+            }
+        }
+
+        function saveDB() {
+            localStorage.setItem('cleaning_system_db', JSON.stringify(dbData));
+        }
+    </script>
+</body>
+</html>
