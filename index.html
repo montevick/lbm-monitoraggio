@@ -113,7 +113,7 @@
                             <div class="p-3 bg-gray-50 text-gray-600 rounded-lg"><i class="fa-solid fa-id-card text-xl"></i></div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Tipo di Account</p>
-                                <p class="text-2xl font-bold text-gray-900 mt-1">Operatore</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1" id="home-role-badge">Operatore</p>
                             </div>
                         </div>
                     </div>
@@ -122,7 +122,7 @@
                 <div id="tab-segna-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Segna Ore</h1>
-                        <p class="text-sm text-gray-500">Inserisci i dettagli del tuo turno di trabalho</p>
+                        <p class="text-sm text-gray-500">Inserisci i dettagli del tuo turno di lavoro</p>
                     </div>
                     <div class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
                         <form onsubmit="salvareTurno(event)" class="space-y-4">
@@ -206,7 +206,7 @@
                             </select>
                         </div>
                         <div class="p-3 bg-purple-50 border border-purple-100 rounded-lg flex justify-between items-center">
-                            <span class="text-xs font-bold text-purple-700 uppercase">Totale Ore Filtrate:</span>
+                            <span class="text-xs font-bold text-purple-700 uppercase">Totale Ore:</span>
                             <span id="adm-total-calc" class="text-lg font-black text-purple-900">00:00</span>
                         </div>
                     </div>
@@ -231,7 +231,7 @@
                 <div id="tab-adm-users" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-2xl font-bold text-purple-800">Gestione Utenti Dipendenti</h1>
-                        <p class="text-sm text-gray-500">Crea nuovi profili di accesso o rimuovi dipendenti esistenti</p>
+                        <p class="text-sm text-gray-500">Crea nuovi profili di acesso o rimuovi dipendenti esistenti</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -297,12 +297,12 @@
     </div>
 
     <script>
-        const MASTER_ADMIN = { username: "admin", password: "1570751", name: "Amministratore (Luan)", role: "admin" };
+        const MASTER_ADMIN = { username: "admin", password: "1570751", name: "Luan (Amministratore)", role: "admin" };
         let currentUser = null;
-        let dbUsers = {};
+        let dbUsers = null;
 
-        // Banco de Dados Online Sincronizado Autocriável (Seguro e estável)
-        const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_ore_db";
+        // Banco de dados online limpo e exclusivo para ti
+        const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_database_v2";
 
         document.getElementById('turno-data').valueAsDate = new Date();
 
@@ -311,23 +311,26 @@
                 const response = await fetch(CLOUD_URL);
                 if (response.ok) {
                     const text = await response.text();
-                    dbUsers = text ? JSON.parse(text) : null;
-                }
-                
-                if (!dbUsers || Object.keys(dbUsers).length === 0) {
-                    dbUsers = {
-                        "funcionario1": { password: "456", name: "Mario Rossi", role: "user", records: [] },
-                        "ana": { password: "123", name: "Ana Silva", role: "user", records: [] }
-                    };
-                    await saveDB();
+                    if (text && text.trim().startsWith('{')) {
+                        dbUsers = JSON.parse(text);
+                    }
                 }
             } catch (e) {
-                console.log("Erro de conexão, carregando cópia local.");
-                dbUsers = JSON.parse(localStorage.getItem('lbm_users_db')) || {};
+                console.log("Errore connessione cloud. Carico backup locale.");
             }
+
+            // Se o banco estiver totalmente vazio na nuvem (primeiro acesso)
+            if (!dbUsers || Object.keys(dbUsers).length === 0) {
+                dbUsers = {
+                    "ana": { password: "123", name: "Ana", role: "user", records: [] }
+                };
+                await saveDB();
+            }
+            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
         }
 
         async function saveDB() {
+            if (!dbUsers) return;
             localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
             try {
                 await fetch(CLOUD_URL, {
@@ -335,11 +338,11 @@
                     body: JSON.stringify(dbUsers)
                 });
             } catch (e) {
-                console.error("Erro ao sincronizar na nuvem.");
+                console.error("Errore sincronizzazione Cloud.");
             }
         }
 
-        // Executa a carga inicial assim que a página abre
+        // Carrega os dados imediatamente ao abrir o site
         loadDataFromCloud();
 
         async function handleLogin(event) {
@@ -348,14 +351,14 @@
             const passIn = document.getElementById('password').value;
             const errorDiv = document.getElementById('login-error');
 
-            await loadDataFromCloud(); // Sincroniza dados antes de checar
+            await loadDataFromCloud(); 
 
             if (userIn === MASTER_ADMIN.username && passIn === MASTER_ADMIN.password) {
                 loginSuccess(MASTER_ADMIN);
                 return;
             }
 
-            if (dbUsers[userIn] && dbUsers[userIn].password === passIn) {
+            if (dbUsers && dbUsers[userIn] && dbUsers[userIn].password === passIn) {
                 loginSuccess({ username: userIn, ...dbUsers[userIn] });
                 return;
             }
@@ -377,6 +380,7 @@
                 document.getElementById('adm-menu-users').classList.remove('hidden');
                 document.querySelectorAll('.user-only').forEach(el => el.classList.add('hidden'));
                 document.getElementById('profile-role-display').innerText = "Ruolo: Amministratore";
+                document.getElementById('home-role-badge').innerText = "Amministratore";
                 
                 buildAdmSelectors();
                 renderAdmUsersList();
@@ -386,6 +390,7 @@
                 document.getElementById('adm-menu-users').classList.add('hidden');
                 document.querySelectorAll('.user-only').forEach(el => el.classList.remove('hidden'));
                 document.getElementById('profile-role-display').innerText = "Ruolo: Operatore di Pulizia";
+                document.getElementById('home-role-badge').innerText = "Operatore";
                 
                 switchTab('home');
                 updateUserUI();
@@ -486,7 +491,7 @@
         // ================= OPERAÇÕES DO ADMINISTRADOR =================
         function buildAdmSelectors() {
             const userSelect = document.getElementById('adm-select-user');
-            const keys = Object.keys(dbUsers);
+            const keys = Object.keys(dbUsers || {});
             
             if(keys.length === 0) {
                 userSelect.innerHTML = `<option value="">Nessun dipendente presente</option>`;
@@ -503,7 +508,7 @@
             const tableBody = document.getElementById('adm-filtered-table');
             const totalDisplay = document.getElementById('adm-total-calc');
 
-            if (!selectedUser || !dbUsers[selectedUser]) {
+            if (!selectedUser || !dbUsers || !dbUsers[selectedUser]) {
                 tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-400 italic">Seleziona un dipendente valido.</td></tr>`;
                 totalDisplay.innerText = "00:00";
                 return;
@@ -518,14 +523,14 @@
             let totalMinutos = 0;
             records.forEach(r => {
                 const partes = r.ore.split(':');
-                totalMinutos += ((parseInt(partes[0]) || 0) * 60) + (parseInt(passInt(partes[1]) || 0));
+                totalMinutos += ((parseInt(partes[0]) || 0) * 60) + (parseInt(partes[1]) || 0);
             });
             const hTotal = Math.floor(totalMinutos / 60);
             const mTotal = totalMinutos % 60;
             totalDisplay.innerText = `${String(hTotal).padStart(2, '0')}:${String(mTotal).padStart(2, '0')}`;
 
             if (records.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-400 italic">Nessun turno trovato per i filtri selezionati.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-400 italic">Nessun turno trovato.</td></tr>`;
             } else {
                 tableBody.innerHTML = records.map(r => `
                     <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
@@ -544,7 +549,7 @@
             const username = document.getElementById('new-user-username').value.trim().toLowerCase();
             const pass = document.getElementById('new-user-pass').value.trim();
 
-            if (username === 'admin' || dbUsers[username]) {
+            if (username === 'admin' || (dbUsers && dbUsers[username])) {
                 alert('Questo nome utente esiste già o non è valido!');
                 return;
             }
@@ -563,11 +568,11 @@
             document.getElementById('new-user-name').value = '';
             document.getElementById('new-user-username').value = '';
             document.getElementById('new-user-pass').value = '';
-            alert(`Utente ${name} creato com sucesso e sincronizado online!`);
+            alert(`Utente ${name} creato con successo!`);
         }
 
         async function deleteUser(username) {
-            if (confirm(`Sei sicuro di voler eliminare definitivamente l'utente "${dbUsers[username].name}" e tutti i suoi registri?`)) {
+            if (confirm(`Sei sicuro di voler eliminare definitivamente l'utente "${dbUsers[username].name}"?`)) {
                 delete dbUsers[username];
                 await saveDB();
                 renderAdmUsersList();
@@ -577,7 +582,7 @@
 
         function renderAdmUsersList() {
             const table = document.getElementById('adm-users-list-table');
-            const keys = Object.keys(dbUsers);
+            const keys = Object.keys(dbUsers || {});
 
             if(keys.length === 0) {
                 table.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Nessun dipendente registrato.</td></tr>`;
