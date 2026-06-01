@@ -344,6 +344,16 @@
             }
             localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
         }
+        }
+
+            if (!dbUsers || Object.keys(dbUsers).length === 0) {
+                dbUsers = {
+                    "gabriel": { password: "123", name: "Gabriel", role: "user", records: [] }
+                };
+                await saveDB();
+            }
+            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
+        }
 
         async function saveDB() {
             if (!dbUsers) return;
