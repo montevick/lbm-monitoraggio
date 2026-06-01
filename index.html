@@ -138,7 +138,7 @@
                 <div id="tab-segna-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Segna Ore</h1>
-                        <p class="text-xs text-gray-500">Inserisci i detalhes do teu turno</p>
+                        <p class="text-xs text-gray-500">Inserisci i dettagli del tuo turno</p>
                     </div>
                     <div class="p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
                         <form onsubmit="salvareTurno(event)" class="space-y-4">
@@ -195,7 +195,7 @@
                 <div id="tab-adm-panel" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-purple-800">Pannello Controllo Ore</h1>
-                        <p class="text-xs text-gray-500">Seleziona un dipendente e filtra le sue ore mensili</p>
+                        <p class="text-xs text-gray-500">Seleziona un dipendente, controlla o elimina le sue ore</p>
                     </div>
 
                     <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
@@ -236,6 +236,7 @@
                                         <th scope="col" class="px-4 py-3">Luogo</th>
                                         <th scope="col" class="px-4 py-3">Ore</th>
                                         <th scope="col" class="px-4 py-3">Note</th>
+                                        <th scope="col" class="px-4 py-3 text-right">Azione</th>
                                     </tr>
                                 </thead>
                                 <tbody id="adm-filtered-table"></tbody>
@@ -247,7 +248,7 @@
                 <div id="tab-adm-users" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-purple-800">Gestione Utenti Dipendenti</h1>
-                        <p class="text-xs text-gray-500">Crea o rimuovi i profili di accesso</p>
+                        <p class="text-xs text-gray-500">Crea, modifica il nome o rimuovi i profili di accesso</p>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -256,11 +257,11 @@
                             <form onsubmit="handleCreateUser(event)" class="space-y-3">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Nome Completo</label>
-                                    <input type="text" id="new-user-name" required placeholder="Es: Mario Rossi" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm">
+                                    <input type="text" id="new-user-name" required placeholder="Es: Ana Almeida" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Nome Utente (Login)</label>
-                                    <input type="text" id="new-user-username" required placeholder="Es: mariorossi" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm">
+                                    <input type="text" id="new-user-username" required placeholder="Es: ana" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Password</label>
@@ -281,7 +282,7 @@
                                             <th class="px-3 py-2">Nome</th>
                                             <th class="px-3 py-2">Username</th>
                                             <th class="px-3 py-2">Password</th>
-                                            <th class="px-3 py-2 text-right">Azione</th>
+                                            <th class="px-3 py-2 text-right">Azioni</th>
                                         </tr>
                                     </thead>
                                     <tbody id="adm-users-list-table"></tbody>
@@ -317,45 +318,37 @@
         let currentUser = null;
         let dbUsers = {};
 
-        const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_database_v2";
+        const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_database_v3"; // Nova chave de banco limpa
 
-        // Tenta carregar os dados locais imediatamente para não travar a tela
-        function loadLocalData() {
-            const local = localStorage.getItem('lbm_users_db');
-            if (local) {
-                try { dbUsers = JSON.parse(local); } catch(e) { dbUsers = {}; }
-            }
-        }
-        loadLocalData();
-
-        // Puxa os dados atualizados da nuvem de forma limpa e segura
+        // Sincroniza os dados com a nuvem sem deixar cache do celular travar
         async function loadDataFromCloud() {
             try {
-                const response = await fetch(CLOUD_URL + '?t=' + new Date().getTime()); // Evita cache do navegador
+                const response = await fetch(`${CLOUD_URL}?nocache=${Date.now()}`, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                });
                 if (response.ok) {
                     const text = await response.text();
                     if (text && text.trim().startsWith('{')) {
-                        const parsed = JSON.parse(text);
-                        if (Object.keys(parsed).length > 0) {
-                            dbUsers = parsed;
-                            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
-                        }
+                        dbUsers = JSON.parse(text);
+                        localStorage.setItem('lbm_db_clean_v3', JSON.stringify(dbUsers));
                     }
                 }
             } catch (e) {
-                console.log("Errore sincro Cloud, uso locali.");
+                console.log("Offline, caricamento dati locali.");
+                const local = localStorage.getItem('lbm_db_clean_v3');
+                if (local) dbUsers = JSON.parse(local);
             }
 
-            if (!dbUsers || Object.keys(dbUsers).length === 0) {
-                dbUsers = {
-                    "ana": { password: "123", name: "Ana Almeida", role: "user", records: [] }
-                };
+            // Se o banco estiver totalmente limpo (clean), inicia com objeto estruturado vazio
+            if (!dbUsers) {
+                dbUsers = {};
                 await saveDB();
             }
         }
 
         async function saveDB() {
-            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
+            localStorage.setItem('lbm_db_clean_v3', JSON.stringify(dbUsers));
             try {
                 await fetch(CLOUD_URL, {
                     method: 'POST',
@@ -363,7 +356,7 @@
                     headers: { 'Content-Type': 'application/json' }
                 });
             } catch (e) {
-                console.error("Errore invio dati al Cloud.");
+                console.error("Errore salvataggio Cloud.");
             }
         }
 
@@ -413,7 +406,7 @@
         async function handleLogin(event) {
             if(event) event.preventDefault();
             const btn = document.getElementById('btn-login-submit');
-            if(btn) btn.innerText = "Caricamento...";
+            if(btn) btn.innerText = "Sincronizzazione...";
 
             const userIn = document.getElementById('username').value.trim().toLowerCase();
             const passIn = document.getElementById('password').value;
@@ -421,7 +414,6 @@
 
             if(errorDiv) errorDiv.classList.add('hidden');
 
-            // Força o carregamento da nuvem ANTES de validar
             await loadDataFromCloud(); 
 
             if(btn) btn.innerText = "Accedi";
@@ -441,7 +433,7 @@
 
         function loginSuccess(userObj) {
             currentUser = userObj;
-            localStorage.setItem('lbm_logged_session', JSON.stringify(currentUser));
+            localStorage.setItem('lbm_session_clean_v3', JSON.stringify(currentUser));
 
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-panel').classList.remove('hidden');
@@ -473,7 +465,7 @@
 
         function handleLogout() {
             currentUser = null;
-            localStorage.removeItem('lbm_logged_session');
+            localStorage.removeItem('lbm_session_clean_v3');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('main-panel').classList.add('hidden');
             document.getElementById('username').value = '';
@@ -534,6 +526,7 @@
             if(!dbUsers[currentUser.username].records) dbUsers[currentUser.username].records = [];
             
             dbUsers[currentUser.username].records.unshift({
+                id: Date.now().toString(), // Identificador único para deletar ou modificar se precisar
                 data: dataFormatada,
                 ore: ore,
                 luogo: luogo,
@@ -610,7 +603,7 @@
             const totalDisplay = document.getElementById('adm-total-calc');
 
             if (!selectedUser || !dbUsers || !dbUsers[selectedUser]) {
-                if(tableBody) tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Seleziona un dipendente.</td></tr>`;
+                if(tableBody) tableBody.innerHTML = `<tr><td colspan="5" class="px-4 py-3 text-center text-gray-400 italic">Seleziona un dipendente.</td></tr>`;
                 if(totalDisplay) totalDisplay.innerText = "00:00";
                 return;
             }
@@ -632,7 +625,7 @@
 
             if(tableBody) {
                 if (records.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno trovato.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno trovato.</td></tr>`;
                 } else {
                     tableBody.innerHTML = records.map(r => `
                         <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
@@ -640,8 +633,25 @@
                             <td class="px-4 py-3">${r.luogo}</td>
                             <td class="px-4 py-3 font-bold text-purple-700">${r.ore}</td>
                             <td class="px-4 py-3 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
+                            <td class="px-4 py-3 text-right">
+                                <button onclick="deleteHourRecord('${selectedUser}', '${r.id}')" class="text-red-600 hover:text-red-900 font-medium text-xs">
+                                    <i class="fa-solid fa-trash-can"></i> Elimina
+                                </button>
+                            </td>
                         </tr>
                     `).join('');
+                }
+            }
+        }
+
+        // OPÇÃO PEDIDA: Administrador excluir um registro de hora incorreto
+        async function deleteHourRecord(username, recordId) {
+            if(confirm("Sei sicuro di voler eliminare questo registro di ore?")) {
+                await loadDataFromCloud();
+                if(dbUsers[username] && dbUsers[username].records) {
+                    dbUsers[username].records = dbUsers[username].records.filter(r => r.id !== recordId);
+                    await saveDB();
+                    renderAdmHours();
                 }
             }
         }
@@ -657,7 +667,6 @@
                 return;
             }
 
-            // Puxa o banco fresco da nuvem antes de adicionar para não apagar ninguém
             await loadDataFromCloud();
 
             dbUsers[username] = {
@@ -675,6 +684,22 @@
             document.getElementById('new-user-username').value = '';
             document.getElementById('new-user-pass').value = '';
             alert(`Utente ${name} creato con successo!`);
+        }
+
+        // OPÇÃO PEDIDA: Modificar o nome do funcionário diretamente pelo Painel ADM
+        async function editUserName(username) {
+            const currentName = dbUsers[username].name;
+            const newName = prompt(`Modifica il nome per l'utente "${username}":`, currentName);
+            
+            if (newName && newName.trim() !== "") {
+                await loadDataFromCloud();
+                if(dbUsers[username]) {
+                    dbUsers[username].name = newName.trim();
+                    await saveDB();
+                    renderAdmUsersList();
+                    buildAdmSelectors();
+                }
+            }
         }
 
         async function deleteUser(username) {
@@ -702,8 +727,11 @@
                     <td class="px-3 py-2 font-medium text-gray-900">${dbUsers[k].name}</td>
                     <td class="px-3 py-2 text-gray-600">${k}</td>
                     <td class="px-3 py-2 font-mono text-xs">${dbUsers[k].password}</td>
-                    <td class="px-3 py-2 text-right">
-                        <button onclick="deleteUser('${k}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-bold transition">
+                    <td class="px-3 py-2 text-right space-x-2">
+                        <button onclick="editUserName('${k}')" class="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-xs font-bold transition" title="Modifica Nome">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="deleteUser('${k}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-bold transition" title="Elimina Utente">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -711,29 +739,32 @@
             `).join('');
         }
 
-        // ================= INICIALIZAÇÃO FIXA E SEGURA =================
+        // ================= INICIALIZAÇÃO FIXA =================
         window.addEventListener('DOMContentLoaded', async () => {
             const dateInput = document.getElementById('turno-data');
             if(dateInput) dateInput.valueAsDate = new Date();
             
-            // 1. Tenta carregar a sessão salva na hora
-            const savedSession = localStorage.getItem('lbm_logged_session');
+            const local = localStorage.getItem('lbm_db_clean_v3');
+            if (local) dbUsers = JSON.parse(local);
+
+            const savedSession = localStorage.getItem('lbm_session_clean_v3');
             if (savedSession) {
                 try {
                     const parsedUser = JSON.parse(savedSession);
                     if (parsedUser.username === MASTER_ADMIN.username && parsedUser.password === MASTER_ADMIN.password) {
                         loginSuccess(MASTER_ADMIN);
-                    } else if (dbUsers[parsedUser.username] && dbUsers[parsedUser.username].password === parsedUser.password) {
-                        loginSuccess({ username: parsedUser.username, ...dbUsers[parsedUser.username] });
+                    } else {
+                        await loadDataFromCloud();
+                        if (dbUsers[parsedUser.username] && dbUsers[parsedUser.username].password === parsedUser.password) {
+                            loginSuccess({ username: parsedUser.username, ...dbUsers[parsedUser.username] });
+                        }
                     }
                 } catch(e) {
-                    localStorage.removeItem('lbm_logged_session');
+                    localStorage.removeItem('lbm_session_clean_v3');
                 }
             }
 
-            // 2. Atualiza a nuvem por trás sem travar a interface do telemóvel
             await loadDataFromCloud();
-            
             if (currentUser && currentUser.role === 'admin') {
                 buildAdmSelectors();
                 renderAdmUsersList();
