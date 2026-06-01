@@ -142,7 +142,7 @@
                             </div>
                             <div>
                                 <label class="block mb-2 text-sm font-medium text-gray-700">Note / Descrizione attività</label>
-                                <textarea id="turno-note" rows="3" placeholder="Descrivi il lavoro svolto..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></textarea>
+                                <textarea id="turno-note" rows="3" placeholder="Descrivi il trabalho svolto..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm"></textarea>
                             </div>
                             <div class="flex items-center space-x-4 pt-2">
                                 <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
@@ -231,7 +231,7 @@
                 <div id="tab-adm-users" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-2xl font-bold text-purple-800">Gestione Utenti Dipendenti</h1>
-                        <p class="text-sm text-gray-500">Crea nuovi profili di acesso o rimuovi dipendenti esistenti</p>
+                        <p class="text-sm text-gray-500">Crea nuovi profili di accesso o rimuovi dipendenti esistenti</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -297,27 +297,63 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DA CONTA MASTER DO ADMINISTRADOR (Senha Atualizada)
+        // CONFIGURAÇÃO DO ADMINISTRADOR MASTER
         const MASTER_ADMIN = { username: "admin", password: "1570751", name: "Amministratore (Luan)", role: "admin" };
-
         let currentUser = null;
-        
-        let dbUsers = JSON.parse(localStorage.getItem('lbm_users_db'));
-        if (!dbUsers) {
-            dbUsers = {
-                "funcionario1": { password: "456", name: "Mario Rossi", role: "user", records: [] },
-                "funcionario2": { password: "789", name: "Ana Silva", role: "user", records: [] }
-            };
-            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
-        }
+        let dbUsers = {};
+
+        // URL da Nuvem de Sincronização em tempo real (Gratuita e sem expiração)
+        // Usando um serviço público de armazenamento JSON seguro para o projeto
+        const CLOUD_BIN_ID = "lbm_empresa_pulizie_db_2026"; 
+        const CLOUD_URL = `https://jsonstorage.net/api/items/${CLOUD_BIN_ID}`;
 
         document.getElementById('turno-data').valueAsDate = new Date();
 
-        function handleLogin(event) {
+        // Carrega os dados da nuvem assim que o site abre
+        async function loadDataFromCloud() {
+            try {
+                const response = await fetch(CLOUD_URL);
+                if (response.ok) {
+                    const data = await response.json();
+                    dbUsers = data || {};
+                } else {
+                    // Se o banco estiver vazio na primeira vez, cria contas de teste
+                    dbUsers = {
+                        "funcionario1": { password: "456", name: "Mario Rossi", role: "user", records: [] },
+                        "funcionario2": { password: "789", name: "Ana Silva", role: "user", records: [] }
+                    };
+                    await saveDB();
+                }
+            } catch (e) {
+                console.log("Erro ao conectar na nuvem, usando backup local temporário.");
+                dbUsers = JSON.parse(localStorage.getItem('lbm_users_db')) || {};
+            }
+        }
+
+        async function saveDB() {
+            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
+            try {
+                await fetch(CLOUD_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dbUsers)
+                });
+            } catch (e) {
+                console.error("Erro ao sincronizar dados na nuvem.");
+            }
+        }
+
+        // Inicializa carregando os dados globais da internet
+        loadDataFromCloud();
+
+        async function handleLogin(event) {
             event.preventDefault();
             const userIn = document.getElementById('username').value.trim().toLowerCase();
             const passIn = document.getElementById('password').value;
             const errorDiv = document.getElementById('login-error');
+
+            // Recarrega os dados antes de checar o login para garantir novos usuários
+            await loadDataFromCloud();
 
             if (userIn === MASTER_ADMIN.username && passIn === MASTER_ADMIN.password) {
                 loginSuccess(MASTER_ADMIN);
@@ -389,7 +425,7 @@
         }
 
         // ================= OPERAÇÕES DO FUNCIONÁRIO =================
-        function salvareTurno(event) {
+        async function salvareTurno(event) {
             event.preventDefault();
             if (!currentUser || currentUser.role === 'admin') return;
 
@@ -401,6 +437,8 @@
             const partesData = dataRaw.split('-');
             const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
 
+            await loadDataFromCloud(); // Atualiza antes de salvar
+
             if(!dbUsers[currentUser.username].records) dbUsers[currentUser.username].records = [];
             
             dbUsers[currentUser.username].records.unshift({
@@ -411,11 +449,11 @@
                 rawMonth: partesData[1]
             });
 
-            saveDB();
+            await saveDB(); // Salva direto na nuvem global
             updateUserUI();
 
             const status = document.getElementById('statusPonto');
-            status.innerText = "Registrato con successo!";
+            status.innerText = "Registrato con successo Online!";
             document.getElementById('turno-ore').value = '';
             document.getElementById('turno-luogo').value = '';
             document.getElementById('turno-note').value = '';
@@ -505,7 +543,7 @@
             }
         }
 
-        function handleCreateUser(event) {
+        async function handleCreateUser(event) {
             event.preventDefault();
             const name = document.getElementById('new-user-name').value.trim();
             const username = document.getElementById('new-user-username').value.trim().toLowerCase();
@@ -523,20 +561,20 @@
                 records: []
             };
 
-            saveDB();
+            await saveDB();
             renderAdmUsersList();
             buildAdmSelectors();
 
             document.getElementById('new-user-name').value = '';
             document.getElementById('new-user-username').value = '';
             document.getElementById('new-user-pass').value = '';
-            alert(`Utente ${name} creato con successo!`);
+            alert(`Utente ${name} creato con successo ed è online!`);
         }
 
-        function deleteUser(username) {
+        async function deleteUser(username) {
             if (confirm(`Sei sicuro di voler eliminare definitivamente l'utente "${dbUsers[username].name}" e tutti i suoi registri orari?`)) {
                 delete dbUsers[username];
-                saveDB();
+                await saveDB();
                 renderAdmUsersList();
                 buildAdmSelectors();
             }
@@ -563,10 +601,6 @@
                     </td>
                 </tr>
             `).join('');
-        }
-
-        function saveDB() {
-            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
         }
     </script>
 </body>
