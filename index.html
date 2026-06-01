@@ -24,7 +24,7 @@
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-700">Nome Utente</label>
-                    <input type="text" id="username" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Esempio: admin">
+                    <input type="text" id="username" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Esempio: ana" autofocus autocomplete="off" autocapitalize="none">
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-700">Password</label>
@@ -35,6 +35,12 @@
                     Accedi
                 </button>
             </form>
+            
+            <div class="text-center pt-2">
+                <button onclick="forceSyncData()" class="text-xs text-gray-400 hover:text-blue-600 transition underline">
+                    <i class="fa-solid fa-rotate"></i> Forzare Aggiornamento Dati
+                </button>
+            </div>
         </div>
     </div>
 
@@ -138,7 +144,7 @@
                 <div id="tab-segna-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Segna Ore</h1>
-                        <p class="text-xs text-gray-500">Inserisci i dettagli del tuo turno</p>
+                        <p class="text-xs text-gray-500">Inserisci i detalhes do teu turno</p>
                     </div>
                     <div class="p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
                         <form onsubmit="salvareTurno(event)" class="space-y-4">
@@ -261,7 +267,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Nome Utente (Login)</label>
-                                    <input type="text" id="new-user-username" required placeholder="Es: ana" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm">
+                                    <input type="text" id="new-user-username" required placeholder="Es: ana" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm" autocapitalize="none">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Password</label>
@@ -318,9 +324,9 @@
         let currentUser = null;
         let dbUsers = {};
 
-        const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_database_v3"; // Nova chave de banco limpa
+        // Nova chave de banco limpa e blindada contra sobreposição
+        const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_database_v3"; 
 
-        // Sincroniza os dados com a nuvem sem deixar cache do celular travar
         async function loadDataFromCloud() {
             try {
                 const response = await fetch(`${CLOUD_URL}?nocache=${Date.now()}`, {
@@ -335,12 +341,9 @@
                     }
                 }
             } catch (e) {
-                console.log("Offline, caricamento dati locali.");
                 const local = localStorage.getItem('lbm_db_clean_v3');
                 if (local) dbUsers = JSON.parse(local);
             }
-
-            // Se o banco estiver totalmente limpo (clean), inicia com objeto estruturado vazio
             if (!dbUsers) {
                 dbUsers = {};
                 await saveDB();
@@ -358,6 +361,14 @@
             } catch (e) {
                 console.error("Errore salvataggio Cloud.");
             }
+        }
+
+        async function forceSyncData() {
+            const errorDiv = document.getElementById('login-error');
+            if(errorDiv) errorDiv.classList.add('hidden');
+            alert("Sincronizzazione forzata in corso... Attendi.");
+            await loadDataFromCloud();
+            alert("Dati aggiornati correttamente dalla nuvola! Ora puoi provare il login.");
         }
 
         function buildMobileNav() {
@@ -406,10 +417,11 @@
         async function handleLogin(event) {
             if(event) event.preventDefault();
             const btn = document.getElementById('btn-login-submit');
-            if(btn) btn.innerText = "Sincronizzazione...";
+            if(btn) btn.innerText = "Connessione...";
 
-            const userIn = document.getElementById('username').value.trim().toLowerCase();
-            const passIn = document.getElementById('password').value;
+            // Blindagem total contra espaços e maiúsculas automáticas do celular
+            const userIn = document.getElementById('username').value.trim().toLowerCase().replace(/\s+/g, '');
+            const passIn = document.getElementById('password').value.trim();
             const errorDiv = document.getElementById('login-error');
 
             if(errorDiv) errorDiv.classList.add('hidden');
@@ -508,7 +520,6 @@
             }
         }
 
-        // ================= OPERAÇÕES DO FUNCIONÁRIO =================
         async function salvareTurno(event) {
             event.preventDefault();
             if (!currentUser || currentUser.role === 'admin') return;
@@ -526,7 +537,7 @@
             if(!dbUsers[currentUser.username].records) dbUsers[currentUser.username].records = [];
             
             dbUsers[currentUser.username].records.unshift({
-                id: Date.now().toString(), // Identificador único para deletar ou modificar se precisar
+                id: Date.now().toString(),
                 data: dataFormatada,
                 ore: ore,
                 luogo: luogo,
@@ -579,7 +590,6 @@
             }
         }
 
-        // ================= OPERAÇÕES DO ADMINISTRADOR =================
         function buildAdmSelectors() {
             const userSelect = document.getElementById('adm-select-user');
             if(!userSelect) return;
@@ -644,7 +654,6 @@
             }
         }
 
-        // OPÇÃO PEDIDA: Administrador excluir um registro de hora incorreto
         async function deleteHourRecord(username, recordId) {
             if(confirm("Sei sicuro di voler eliminare questo registro di ore?")) {
                 await loadDataFromCloud();
@@ -659,7 +668,7 @@
         async function handleCreateUser(event) {
             event.preventDefault();
             const name = document.getElementById('new-user-name').value.trim();
-            const username = document.getElementById('new-user-username').value.trim().toLowerCase();
+            const username = document.getElementById('new-user-username').value.trim().toLowerCase().replace(/\s+/g, '');
             const pass = document.getElementById('new-user-pass').value.trim();
 
             if (username === 'admin' || dbUsers[username]) {
@@ -686,7 +695,6 @@
             alert(`Utente ${name} creato con successo!`);
         }
 
-        // OPÇÃO PEDIDA: Modificar o nome do funcionário diretamente pelo Painel ADM
         async function editUserName(username) {
             const currentName = dbUsers[username].name;
             const newName = prompt(`Modifica il nome per l'utente "${username}":`, currentName);
@@ -728,10 +736,10 @@
                     <td class="px-3 py-2 text-gray-600">${k}</td>
                     <td class="px-3 py-2 font-mono text-xs">${dbUsers[k].password}</td>
                     <td class="px-3 py-2 text-right space-x-2">
-                        <button onclick="editUserName('${k}')" class="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-xs font-bold transition" title="Modifica Nome">
+                        <button onclick="editUserName('${k}')" class="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-xs font-bold transition">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <button onclick="deleteUser('${k}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-bold transition" title="Elimina Utente">
+                        <button onclick="deleteUser('${k}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-bold transition">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -739,7 +747,6 @@
             `).join('');
         }
 
-        // ================= INICIALIZAÇÃO FIXA =================
         window.addEventListener('DOMContentLoaded', async () => {
             const dateInput = document.getElementById('turno-data');
             if(dateInput) dateInput.valueAsDate = new Date();
