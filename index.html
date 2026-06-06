@@ -535,12 +535,7 @@
                 alert("Errore di connessione con il server.");
             }
         }
-         
-        function baixarPDF() {
-            const mes = new Date().toISOString().slice(0,7);
-            window.open('${API_URL}/exportar_pdf?username=${currentUser.username}&mes=${mes});
-        }
-
+        
         async function updateUserUI() {
             if(!currentUser) return;
             try {
