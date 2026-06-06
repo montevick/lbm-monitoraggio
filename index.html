@@ -445,11 +445,6 @@
                 updateUserUI();
             }
         }
-
-        function baixarPDF() {
-            const mes = new Date().toISOString().slice(0,7);
-            window.open('${API_URL}/exportar_pdf?username=${currentUser.username}&mes=${mes});
-       }
         
         function handleLogout() {
             currentUser = null;
@@ -539,6 +534,11 @@
             } catch (e) {
                 alert("Errore di connessione con il server.");
             }
+        }
+         
+        function baixarPDF() {
+            const mes = new Date().toISOString().slice(0,7);
+            window.open('${API_URL}/exportar_pdf?username=${currentUser.username}&mes=${mes});
         }
 
         async function updateUserUI() {
