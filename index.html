@@ -495,6 +495,7 @@
             if (!currentUser || currentUser.role === 'admin') return;
 
             const dataRaw = document.getElementById('turno-data').value;
+            const status = document.getElementById('turno-status').value; // Captura o valor do select
             const ore = document.getElementById('turno-ore').value.trim();
             const luogo = document.getElementById('turno-luogo').value.trim();
             const note = document.getElementById('turno-note').value.trim();
@@ -511,6 +512,7 @@
                         data: dataFormatada,
                         ore: ore,
                         luogo: luogo,
+                        status: status,
                         note: note || '-',
                         rawMonth: partesData[1]
                     })
@@ -523,9 +525,10 @@
                         setTimeout(() => { status.innerText = ''; }, 3000);
                     }
                     document.getElementById('turno-ore').value = '';
+                    document.getElementById('turno-status').value = '';
                     document.getElementById('turno-luogo').value = '';
                     document.getElementById('turno-note').value = '';
-                    updateUserUI();
+                    updateUserUI(); // Atualiza a tabela
                 }
             } catch (e) {
                 alert("Errore di connessione con il server.");
