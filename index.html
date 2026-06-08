@@ -325,6 +325,10 @@
         </div>
     </div>
 
+    <script type="module" src="seu-arquivo.js"></script>
+
+    <script type="module">
+    
     <script>
         // ======= COLOQUE AQUI O SEU LINK DO RENDER =======
         const API_URL = "https://lbm-sistema.onrender.com"; 
@@ -706,20 +710,24 @@
             `).join('');
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            const dateInput = document.getElementById('turno-data');
-            if(dateInput) dateInput.valueAsDate = new Date();
-            
-            const savedSession = localStorage.getItem('lbm_render_session');
-            if (savedSession) {
-                try {
-                    const parsedUser = JSON.parse(savedSession);
-                    loginSuccess(parsedUser);
-                } catch(e) {
-                    localStorage.removeItem('lbm_render_session');
-                }
+        window.addEventListener('load', async () => {
+    const dateInput = document.getElementById('turno-data');
+    if(dateInput) dateInput.valueAsDate = new Date();
+    
+    const savedSession = localStorage.getItem('lbm_render_session');
+    if (savedSession) {
+        try {
+            const parsedUser = JSON.parse(savedSession);
+            // Garante que o loginSuccess só rode se o DOM estiver pronto
+            if (typeof loginSuccess === 'function') {
+                loginSuccess(parsedUser);
             }
-        });
+        } catch(e) {
+            console.error("Sessão corrompida, limpando...");
+            localStorage.removeItem('lbm_render_session');
+        }
+    }
+});
     </script>
 </body>
 </html>
