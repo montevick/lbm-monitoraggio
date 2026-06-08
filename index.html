@@ -15,6 +15,7 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans antialiased">
 
+    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-100 px-4">
         <div class="w-full max-w-md p-6 sm:p-8 bg-white border border-gray-200 rounded-xl shadow-md space-y-6">
             <div class="text-center space-y-4">
@@ -24,29 +25,33 @@
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-700">Nome Utente</label>
-                    <input type="text" id="username" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Esempio: admin">
+                    <input type="text" id="username" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Esempio: ana" autofocus autocomplete="off" autocapitalize="none">
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-700">Password</label>
                     <input type="password" id="password" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
                 </div>
                 <div id="login-error" class="text-sm text-red-600 font-medium hidden">Credenziali errate o errore di connessione!</div>
-                <button type="submit" class="w-full px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
+                <button type="submit" id="btn-login-submit" class="w-full px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm shadow-sm transition">
                     Accedi
                 </button>
             </form>
         </div>
     </div>
 
+    <!-- PAINEL PRINCIPAL -->
     <div id="main-panel" class="hidden">
         
+        <!-- HEADER PARA MOBILE -->
         <header class="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-30">
             <img src="logolbm.png" alt="LBM Logo" class="h-10 w-auto object-contain">
             <button onclick="handleLogout()" class="text-red-600 p-2 text-sm font-medium flex items-center space-x-1">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Esci</span>
-            </header>
+            </button>
+        </header>
 
+        <!-- MENU LATERAL (DESKTOP) -->
         <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-white border-r border-gray-200 hidden md:flex flex-col justify-between px-3 py-4">
             <div>
                 <div class="flex items-center justify-center px-2 py-3 mb-6 border-b border-gray-100">
@@ -104,13 +109,16 @@
             </div>
         </aside>
 
+        <!-- BARRA INFERIOR (MOBILE) -->
         <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-lg">
             <div class="grid grid-cols-4 h-16 max-w-lg mx-auto font-medium" id="mobile-nav-buttons"></div>
         </nav>
 
+        <!-- CONTEÚDO PRINCIPAL -->
         <div class="md:pl-64 bg-gray-50 min-h-screen pb-mobile">
             <div class="p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
                 
+                <!-- 1. HOME -->
                 <div id="tab-home" class="tab-content space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Benvenuto, <span class="user-display">Utente</span></h1>
@@ -134,10 +142,11 @@
                     </div>
                 </div>
 
+                <!-- 2. SEGNA ORE -->
                 <div id="tab-segna-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Segna Ore</h1>
-                        <p class="text-xs text-gray-500">Inserisci i dettagli del tuo turno di lavoro</p>
+                        <p class="text-xs text-gray-500">Inserisci i dettagli do teu turno</p>
                     </div>
                     <div class="p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
                         <form onsubmit="salvareTurno(event)" class="space-y-4">
@@ -169,6 +178,7 @@
                     </div>
                 </div>
 
+                <!-- 3. MIE ORE -->
                 <div id="tab-mie-ore" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Mie Ore</h1>
@@ -191,10 +201,11 @@
                     </div>
                 </div>
 
+                <!-- 4. ADM - CONTROLLO ORE -->
                 <div id="tab-adm-panel" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-purple-800">Pannello Controllo Ore</h1>
-                        <p class="text-xs text-gray-500">Seleziona un dipendente e filtra le sue ore mensili</p>
+                        <p class="text-xs text-gray-500">Seleziona un dipendente, controlla o elimina le sue ore</p>
                     </div>
 
                     <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
@@ -235,6 +246,7 @@
                                         <th scope="col" class="px-4 py-3">Luogo</th>
                                         <th scope="col" class="px-4 py-3">Ore</th>
                                         <th scope="col" class="px-4 py-3">Note</th>
+                                        <th scope="col" class="px-4 py-3 text-right">Azione</th>
                                     </tr>
                                 </thead>
                                 <tbody id="adm-filtered-table"></tbody>
@@ -243,10 +255,11 @@
                     </div>
                 </div>
 
+                <!-- 5. ADM - GESTIONE UTENTI -->
                 <div id="tab-adm-users" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-purple-800">Gestione Utenti Dipendenti</h1>
-                        <p class="text-xs text-gray-500">Crea o rimuovi i profili di acesso</p>
+                        <p class="text-xs text-gray-500">Crea, modifica il nome o rimuovi i profili di acesso</p>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -255,11 +268,11 @@
                             <form onsubmit="handleCreateUser(event)" class="space-y-3">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Nome Completo</label>
-                                    <input type="text" id="new-user-name" required placeholder="Es: Mario Rossi" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm">
+                                    <input type="text" id="new-user-name" required placeholder="Es: Ana Almeida" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Nome Utente (Login)</label>
-                                    <input type="text" id="new-user-username" required placeholder="Es: mariorossi" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm">
+                                    <input type="text" id="new-user-username" required placeholder="Es: ana" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm" autocapitalize="none">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Password</label>
@@ -280,7 +293,7 @@
                                             <th class="px-3 py-2">Nome</th>
                                             <th class="px-3 py-2">Username</th>
                                             <th class="px-3 py-2">Password</th>
-                                            <th class="px-3 py-2 text-right">Azione</th>
+                                            <th class="px-3 py-2 text-right">Azioni</th>
                                         </tr>
                                     </thead>
                                     <tbody id="adm-users-list-table"></tbody>
@@ -290,6 +303,7 @@
                     </div>
                 </div>
 
+                <!-- 6. PROFILO -->
                 <div id="tab-profilo" class="tab-content hidden space-y-6">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Profilo Utente</h1>
@@ -312,51 +326,12 @@
     </div>
 
     <script>
-        const MASTER_ADMIN = { username: "admin", password: "1570751", name: "Luan (Amministratore)", role: "admin" };
+        // ======= COLOQUE AQUI O SEU LINK DO RENDER =======
+        const API_URL = "https://lbm-sistema.onrender.com"; 
+        
         let currentUser = null;
-        let dbUsers = {};
-
-        const CLOUD_URL = "https://kvdb.io/MN86yHffN7f9Q8R7u5kbyf/lbm_database_v2";
-
-        // Carrega do LocalStorage primeiro para evitar congelamento de tela
-        const local = localStorage.getItem('lbm_users_db');
-        if (local) {
-            try { dbUsers = JSON.parse(local); } catch(e) { dbUsers = {}; }
-        }
-
-        async function loadDataFromCloud() {
-            try {
-                const response = await fetch(CLOUD_URL);
-                if (response.ok) {
-                    const text = await response.text();
-                    if (text && text.trim().startsWith('{')) {
-                        dbUsers = JSON.parse(text);
-                        localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
-                    }
-                }
-            } catch (e) {
-                console.log("Errore sincronizzazione Cloud. Uso dati locali.");
-            }
-
-            if (!dbUsers || Object.keys(dbUsers).length === 0) {
-                dbUsers = {
-                    "ana": { password: "123", name: "Ana Silva", role: "user", records: [] }
-                };
-                await saveDB();
-            }
-        }
-
-        async function saveDB() {
-            localStorage.setItem('lbm_users_db', JSON.stringify(dbUsers));
-            try {
-                await fetch(CLOUD_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(dbUsers)
-                });
-            } catch (e) {
-                console.error("Errore invio dati al Cloud.");
-            }
-        }
+        let admAllRecords = [];
+        let admAllUsers = [];
 
         function buildMobileNav() {
             const container = document.getElementById('mobile-nav-buttons');
@@ -403,30 +378,38 @@
 
         async function handleLogin(event) {
             if(event) event.preventDefault();
-            const userIn = document.getElementById('username').value.trim().toLowerCase();
-            const passIn = document.getElementById('password').value;
+            const btn = document.getElementById('btn-login-submit');
+            if(btn) btn.innerText = "Connessione...";
+
+            const usernameIn = document.getElementById('username').value.trim();
+            const passwordIn = document.getElementById('password').value.trim();
             const errorDiv = document.getElementById('login-error');
 
             if(errorDiv) errorDiv.classList.add('hidden');
 
-            await loadDataFromCloud(); 
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameIn, password: passwordIn })
+                });
 
-            if (userIn === MASTER_ADMIN.username && passIn === MASTER_ADMIN.password) {
-                loginSuccess(MASTER_ADMIN);
-                return;
+                if (response.ok) {
+                    const userObj = await response.json();
+                    loginSuccess(userObj);
+                } else {
+                    if(errorDiv) errorDiv.classList.remove('hidden');
+                }
+            } catch (e) {
+                if(errorDiv) errorDiv.classList.remove('hidden');
+            } finally {
+                if(btn) btn.innerText = "Accedi";
             }
-
-            if (dbUsers && dbUsers[userIn] && dbUsers[userIn].password === passIn) {
-                loginSuccess({ username: userIn, ...dbUsers[userIn] });
-                return;
-            }
-
-            if(errorDiv) errorDiv.classList.remove('hidden');
         }
 
         function loginSuccess(userObj) {
             currentUser = userObj;
-            localStorage.setItem('lbm_logged_session', JSON.stringify(currentUser));
+            localStorage.setItem('lbm_render_session', JSON.stringify(currentUser));
 
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-panel').classList.remove('hidden');
@@ -441,8 +424,7 @@
                 document.getElementById('profile-role-display').innerText = "Ruolo: Amministratore";
                 document.getElementById('home-role-badge').innerText = "Amministratore";
                 
-                buildAdmSelectors();
-                renderAdmUsersList();
+                loadAdminData();
                 switchTab('adm-panel');
             } else {
                 document.getElementById('adm-menu-hours').classList.add('hidden');
@@ -458,7 +440,7 @@
 
         function handleLogout() {
             currentUser = null;
-            localStorage.removeItem('lbm_logged_session');
+            localStorage.removeItem('lbm_render_session');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('main-panel').classList.add('hidden');
             document.getElementById('username').value = '';
@@ -501,7 +483,6 @@
             }
         }
 
-        // ================= OPERAÇÕES DO FUNCIONÁRIO =================
         async function salvareTurno(event) {
             event.preventDefault();
             if (!currentUser || currentUser.role === 'admin') return;
@@ -514,75 +495,98 @@
             const partesData = dataRaw.split('-');
             const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
 
-            await loadDataFromCloud(); 
+            try {
+                const response = await fetch(`${API_URL}/api/records`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: currentUser.username,
+                        data: dataFormatada,
+                        ore: ore,
+                        luogo: luogo,
+                        note: note || '-',
+                        rawMonth: partesData[1]
+                    })
+                });
 
-            if(!dbUsers[currentUser.username].records) dbUsers[currentUser.username].records = [];
-            
-            dbUsers[currentUser.username].records.unshift({
-                data: dataFormatada,
-                ore: ore,
-                luogo: luogo,
-                note: note || '-',
-                rawMonth: partesData[1]
-            });
-
-            await saveDB(); 
-            updateUserUI();
-
-            const status = document.getElementById('statusPonto');
-            if(status) {
-                status.innerText = "Registrato con successo Online!";
-                setTimeout(() => { status.innerText = ''; }, 3000);
-            }
-            document.getElementById('turno-ore').value = '';
-            document.getElementById('turno-luogo').value = '';
-            document.getElementById('turno-note').value = '';
-        }
-
-        function updateUserUI() {
-            if(!currentUser || !dbUsers[currentUser.username]) return;
-            const records = dbUsers[currentUser.username].records || [];
-            
-            let totalMinutos = 0;
-            records.forEach(r => {
-                const partes = r.ore.split(':');
-                totalMinutos += ((parseInt(partes[0]) || 0) * 60) + (parseInt(partes[1]) || 0);
-            });
-            const hTotal = Math.floor(totalMinutos / 60);
-            const mTotal = totalMinutos % 60;
-            
-            const homeOre = document.getElementById('home-ore-mese');
-            if(homeOre) homeOre.innerText = `${String(hTotal).padStart(2, '0')}:${String(mTotal).padStart(2, '0')} Ore`;
-
-            const tabelaUser = document.getElementById('all-records-table');
-            if(tabelaUser) {
-                if (records.length === 0) {
-                    tabelaUser.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno registrato.</td></tr>`;
-                } else {
-                    tabelaUser.innerHTML = records.map(r => `
-                        <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
-                            <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">${r.data}</td>
-                            <td class="px-4 py-3">${r.luogo}</td>
-                            <td class="px-4 py-3 font-bold text-blue-600">${r.ore}</td>
-                            <td class="px-4 py-3 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
-                        </tr>
-                    `).join('');
+                if (response.ok) {
+                    const status = document.getElementById('statusPonto');
+                    if(status) {
+                        status.innerText = "Registrato con successo!";
+                        setTimeout(() => { status.innerText = ''; }, 3000);
+                    }
+                    document.getElementById('turno-ore').value = '';
+                    document.getElementById('turno-luogo').value = '';
+                    document.getElementById('turno-note').value = '';
+                    updateUserUI();
                 }
+            } catch (e) {
+                alert("Errore di connessione con il server.");
             }
         }
 
-        // ================= OPERAÇÕES DO ADMINISTRADOR =================
+        async function updateUserUI() {
+            if(!currentUser) return;
+            try {
+                const response = await fetch(`${API_URL}/api/records/${currentUser.username}`);
+                const records = await response.json();
+                
+                let totalMinutos = 0;
+                records.forEach(r => {
+                    const partes = r.ore.split(':');
+                    totalMinutos += ((parseInt(partes[0]) || 0) * 60) + (parseInt(partes[1]) || 0);
+                });
+                const hTotal = Math.floor(totalMinutos / 60);
+                const mTotal = totalMinutos % 60;
+                
+                const homeOre = document.getElementById('home-ore-mese');
+                if(homeOre) homeOre.innerText = `${String(hTotal).padStart(2, '0')}:${String(mTotal).padStart(2, '0')} Ore`;
+
+                const tabelaUser = document.getElementById('all-records-table');
+                if(tabelaUser) {
+                    if (records.length === 0) {
+                        tabelaUser.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno registrato.</td></tr>`;
+                    } else {
+                        tabelaUser.innerHTML = records.map(r => `
+                            <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">${r.data}</td>
+                                <td class="px-4 py-3">${r.luogo}</td>
+                                <td class="px-4 py-3 font-bold text-blue-600">${r.ore}</td>
+                                <td class="px-4 py-3 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (e) {
+                console.error("Errore aggiornamento interfaccia utente");
+            }
+        }
+
+        async function loadAdminData() {
+            try {
+                const resUsers = await fetch(`${API_URL}/api/admin/users`);
+                admAllUsers = await resUsers.json();
+                
+                const resRecords = await fetch(`${API_URL}/api/admin/records`);
+                admAllRecords = await resRecords.json();
+
+                buildAdmSelectors();
+                renderAdmUsersList();
+            } catch (e) {
+                console.error("Errore caricamento dati amministratore");
+            }
+        }
+
         function buildAdmSelectors() {
             const userSelect = document.getElementById('adm-select-user');
             if(!userSelect) return;
-            const keys = Object.keys(dbUsers || {});
             
-            if(keys.length === 0) {
+            if(admAllUsers.length === 0) {
                 userSelect.innerHTML = `<option value="">Nessun dipendente presente</option>`;
                 return;
             }
 
-            userSelect.innerHTML = keys.map(k => `<option value="${k}">${dbUsers[k].name} (${k})</option>`).join('');
+            userSelect.innerHTML = admAllUsers.map(u => `<option value="${u.username}">${u.name} (${u.username})</option>`).join('');
             renderAdmHours();
         }
 
@@ -594,16 +598,10 @@
             const tableBody = document.getElementById('adm-filtered-table');
             const totalDisplay = document.getElementById('adm-total-calc');
 
-            if (!selectedUser || !dbUsers || !dbUsers[selectedUser]) {
-                if(tableBody) tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Seleziona un dipendente.</td></tr>`;
-                if(totalDisplay) totalDisplay.innerText = "00:00";
-                return;
-            }
-
-            let records = dbUsers[selectedUser].records || [];
+            let records = admAllRecords.filter(r => r.username === selectedUser);
             
             if (selectedMonth !== 'all') {
-                records = records.filter(r => r.rawMonth === selectedMonth);
+                records = records.filter(r => r.raw_month === selectedMonth);
             }
 
             let totalMinutos = 0;
@@ -617,7 +615,7 @@
 
             if(tableBody) {
                 if (records.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno trovato.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-4 py-3 text-center text-gray-400 italic">Nessun turno trovato.</td></tr>`;
                 } else {
                     tableBody.innerHTML = records.map(r => `
                         <tr class="bg-white border-b border-gray-100 hover:bg-gray-50">
@@ -625,69 +623,82 @@
                             <td class="px-4 py-3">${r.luogo}</td>
                             <td class="px-4 py-3 font-bold text-purple-700">${r.ore}</td>
                             <td class="px-4 py-3 text-gray-500 max-w-xs truncate" title="${r.note}">${r.note}</td>
+                            <td class="px-4 py-3 text-right">
+                                <button onclick="deleteHourRecord('${r.id}')" class="text-red-600 hover:text-red-900 font-medium text-xs">
+                                    <i class="fa-solid fa-trash-can"></i> Elimina
+                                </button>
+                            </td>
                         </tr>
                     `).join('');
                 }
             }
         }
 
+        async function deleteHourRecord(recordId) {
+            if(confirm("Sei sicuro di voler eliminare questo registro di ore?")) {
+                try {
+                    const response = await fetch(`${API_URL}/api/admin/records/${recordId}`, { method: 'DELETE' });
+                    if(response.ok) {
+                        loadAdminData();
+                    }
+                } catch(e) { alert("Errore di connessione"); }
+            }
+        }
+
         async function handleCreateUser(event) {
             event.preventDefault();
             const name = document.getElementById('new-user-name').value.trim();
-            const username = document.getElementById('new-user-username').value.trim().toLowerCase();
+            const username = document.getElementById('new-user-username').value.trim();
             const pass = document.getElementById('new-user-pass').value.trim();
 
-            if (username === 'admin' || dbUsers[username]) {
-                alert('Questo nome utente esiste già o non è valido!');
-                return;
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password: pass, name })
+                });
+
+                if (response.ok) {
+                    document.getElementById('new-user-name').value = '';
+                    document.getElementById('new-user-username').value = '';
+                    document.getElementById('new-user-pass').value = '';
+                    alert(`Utente ${name} creato con successo!`);
+                    loadAdminData();
+                } else {
+                    alert("Errore nella creazione: Username potrebbe già esistere.");
+                }
+            } catch (e) {
+                alert("Errore di connessione.");
             }
-
-            await loadDataFromCloud();
-
-            dbUsers[username] = {
-                password: pass,
-                name: name,
-                role: "user",
-                records: []
-            };
-
-            await saveDB();
-            renderAdmUsersList();
-            buildAdmSelectors();
-
-            document.getElementById('new-user-name').value = '';
-            document.getElementById('new-user-username').value = '';
-            document.getElementById('new-user-pass').value = '';
-            alert(`Utente ${name} creato con successo!`);
         }
 
         async function deleteUser(username) {
-            if (confirm(`Sei sicuro di voler eliminare definitivamente l'utente "${dbUsers[username].name}"?`)) {
-                await loadDataFromCloud();
-                delete dbUsers[username];
-                await saveDB();
-                renderAdmUsersList();
-                buildAdmSelectors();
+            if (confirm(`Sei sicuro di voler eliminare definitivamente l'utente "${username}"?`)) {
+                try {
+                    const response = await fetch(`${API_URL}/api/admin/users/${username}`, { method: 'DELETE' });
+                    if(response.ok) {
+                        loadAdminData();
+                    }
+                } catch(e) { alert("Errore di connessione"); }
             }
         }
 
         function renderAdmUsersList() {
             const table = document.getElementById('adm-users-list-table');
             if(!table) return;
-            const keys = Object.keys(dbUsers || {});
 
-            if(keys.length === 0) {
+            if(admAllUsers.length === 0) {
                 table.innerHTML = `<tr><td colspan="4" class="px-3 py-2 text-center text-gray-400 italic">Nessun dipendente registrato.</td></tr>`;
                 return;
             }
 
-            table.innerHTML = keys.map(k => `
+            table.innerHTML = admAllUsers.map(u => `
                 <tr class="border-b border-gray-100 hover:bg-gray-50">
-                    <td class="px-3 py-2 font-medium text-gray-900">${dbUsers[k].name}</td>
-                    <td class="px-3 py-2 text-gray-600">${k}</td>
-                    <td class="px-3 py-2 font-mono text-xs">${dbUsers[k].password}</td>
+                    <td class="px-3 py-2 font-medium text-gray-900">${u.name}</td>
+                    <td class="px-3 py-2 text-gray-600">${u.username}</td>
+                    <td class="px-3 py-2 font-mono text-xs">${u.password}</td>
                     <td class="px-3 py-2 text-right">
-                        <button onclick="deleteUser('${k}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-bold transition">
+                        <button onclick="deleteUser('${u.username}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-bold transition">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -695,35 +706,18 @@
             `).join('');
         }
 
-        // ================= INICIALIZAÇÃO SEGURA (ESPERA O HTML CARREGAR) =================
         window.addEventListener('DOMContentLoaded', async () => {
             const dateInput = document.getElementById('turno-data');
             if(dateInput) dateInput.valueAsDate = new Date();
             
-            // Tenta validar a sessão existente usando dados locais imediatos
-            const savedSession = localStorage.getItem('lbm_logged_session');
+            const savedSession = localStorage.getItem('lbm_render_session');
             if (savedSession) {
                 try {
                     const parsedUser = JSON.parse(savedSession);
-                    if (parsedUser.username === MASTER_ADMIN.username && parsedUser.password === MASTER_ADMIN.password) {
-                        loginSuccess(MASTER_ADMIN);
-                    } else if (dbUsers[parsedUser.username] && dbUsers[parsedUser.username].password === parsedUser.password) {
-                        loginSuccess({ username: parsedUser.username, ...dbUsers[parsedUser.username] });
-                    }
+                    loginSuccess(parsedUser);
                 } catch(e) {
-                    localStorage.removeItem('lbm_logged_session');
+                    localStorage.removeItem('lbm_render_session');
                 }
-            }
-
-            // Sincroniza em segundo plano com a nuvem sem travar a interface
-            await loadDataFromCloud();
-            
-            // Se o admin já estava logado, atualiza as listas com os dados novos da nuvem
-            if (currentUser && currentUser.role === 'admin') {
-                buildAdmSelectors();
-                renderAdmUsersList();
-            } else if (currentUser) {
-                updateUserUI();
             }
         });
     </script>
