@@ -155,13 +155,6 @@
                                     <label class="block mb-1 text-sm font-medium text-gray-700">Data del turno</label>
                                     <input type="date" id="turno-data" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm">
                                 </div>
-                            <div>
-                                <label class="block mb-1 text-sm font-medium text-gray-700">Stato</label>
-                                <select id="turno-status" class="w-full p-2.5 bg=gray-50 border border-gray-300 rounded-lg text-sm">
-                                    <option value="Normale">Turno Normale</option>
-                                    <option value="Malattia/Assenza">Malattia / Assenza</option>
-                                </select>
-                            </div>
                                 <div>
                                     <label class="block mb-1 text-sm font-medium text-gray-700">Ore lavorate</label>
                                     <input type="text" id="turno-ore" placeholder="Es. 08:30" required class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm">
@@ -197,7 +190,6 @@
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
                                     <tr>
                                         <th scope="col" class="px-4 py-3">Data</th>
-                                        <th scope="col" class="px-4 py-3">Status</th>
                                         <th scope="col" class="px-4 py-3">Luogo</th>
                                         <th scope="col" class="px-4 py-3">Ore</th>
                                         <th scope="col" class="px-4 py-3">Note</th>
@@ -244,13 +236,13 @@
                             <span id="adm-total-calc" class="text-lg font-black text-purple-900">00:00</span>
                         </div>
                     </div>
+
                     <div class="bg-white border border-purple-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left text-gray-500">
                                 <thead class="text-xs text-purple-700 uppercase bg-purple-50 border-b border-purple-200">
                                     <tr>
                                         <th scope="col" class="px-4 py-3">Data</th>
-                                        <th scope="col" class="px-4 py-3">Status</th>
                                         <th scope="col" class="px-4 py-3">Luogo</th>
                                         <th scope="col" class="px-4 py-3">Ore</th>
                                         <th scope="col" class="px-4 py-3">Note</th>
@@ -335,7 +327,7 @@
 
     <script>
         // ======= COLOQUE AQUI O SEU LINK DO RENDER =======
-        const API_URL = "https://lbm-sistema.onrender.com"; 
+        const API_URL = "https://seu-projeto-no.onrender.com"; 
         
         let currentUser = null;
         let admAllRecords = [];
@@ -445,7 +437,7 @@
                 updateUserUI();
             }
         }
-        
+
         function handleLogout() {
             currentUser = null;
             localStorage.removeItem('lbm_render_session');
@@ -496,7 +488,6 @@
             if (!currentUser || currentUser.role === 'admin') return;
 
             const dataRaw = document.getElementById('turno-data').value;
-            const status = document.getElementById('turno-status').value; // Captura o valor do select
             const ore = document.getElementById('turno-ore').value.trim();
             const luogo = document.getElementById('turno-luogo').value.trim();
             const note = document.getElementById('turno-note').value.trim();
@@ -513,7 +504,6 @@
                         data: dataFormatada,
                         ore: ore,
                         luogo: luogo,
-                        status: status,
                         note: note || '-',
                         rawMonth: partesData[1]
                     })
@@ -526,16 +516,15 @@
                         setTimeout(() => { status.innerText = ''; }, 3000);
                     }
                     document.getElementById('turno-ore').value = '';
-                    document.getElementById('turno-status').value = '';
                     document.getElementById('turno-luogo').value = '';
                     document.getElementById('turno-note').value = '';
-                    updateUserUI(); // Atualiza a tabela
+                    updateUserUI();
                 }
             } catch (e) {
                 alert("Errore di connessione con il server.");
             }
         }
-        
+
         async function updateUserUI() {
             if(!currentUser) return;
             try {
